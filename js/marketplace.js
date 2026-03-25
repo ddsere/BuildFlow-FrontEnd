@@ -1,0 +1,94 @@
+// පිටුව Load වුණ ගමන් fetchModels function එක run වෙනවා
+document.addEventListener("DOMContentLoaded", () => {
+  fetchModels();
+});
+
+function fetchModels() {
+  // ඔයාගේ Spring Boot Backend URL එක
+  const apiUrl = "http://localhost:8080/api/v1/models";
+
+  fetch(apiUrl)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+    .then((result) => {
+      // අපේ APIResponse එකේ data කොටස ඇතුළේ තමයි models තියෙන්නේ
+      if (result.status === 200) {
+        displayModels(result.data);
+      } else {
+        console.error("Error fetching models:", result.message);
+      }
+    })
+    .catch((error) => {
+      console.error("Backend Connection Error:", error);
+      document.getElementById("models-container").innerHTML =
+        `<div class="alert alert-danger text-center w-100" role="alert">
+                    Failed to load models. Please check if the Spring Boot server is running.
+                 </div>`;
+    });
+}
+
+function displayModels(models) {
+  const container = document.getElementById("models-container");
+  container.innerHTML = ""; // Loading spinner එක අයින් කරනවා
+
+  if (models.length === 0) {
+    container.innerHTML = `<p class="text-center w-100">No 3D models available in the marketplace right now.</p>`;
+    return;
+  }
+
+  // හැම Model එකක් සඳහාම Card එකක් හදනවා
+  models.forEach((model) => {
+    // අංක වලට කොමා දාන්න (උදා: 8500000 -> 8,500,000)
+    const formattedPrice = model.estimatedCost
+      ? model.estimatedCost.toLocaleString()
+      : "N/A";
+
+    const cardHtml = `
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-img-top bg-secondary bg-opacity-10 rounded-top d-flex justify-content-center align-items-center" style="height: 300px; position: relative;">
+                        <model-viewer 
+                            src="${model.modelUrl}" 
+                            alt="${model.modelName}" 
+                            auto-rotate 
+                            camera-controls 
+                            shadow-intensity="1"
+                            style="width: 100%; height: 100%;"
+                            camera-orbit="45deg 55deg 2.5m">
+                        </model-viewer>
+                        <span class="badge bg-primary position-absolute top-0 end-0 m-2">3D View</span>
+                    </div>
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-dark">${model.modelName}</h5>
+                        <p class="card-text text-muted small">${model.description}</p>
+                        
+                        <div class="mt-auto bg-light p-3 rounded">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="fw-semibold">Estimated Cost:</span>
+                                <span class="text-success fw-bold">Rs. ${formattedPrice}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span><i class="bi bi-house-door"></i> Bedrooms:</span>
+                                <span>${model.numBedrooms}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span><i class="bi bi-aspect-ratio"></i> Area:</span>
+                                <span>${model.floorArea} sq.ft</span>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-dark w-100 mt-3 fw-semibold">Request to Build</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+    // හදපු Card එක HTML එකට එකතු කරනවා
+    container.innerHTML += cardHtml;
+  });
+}
