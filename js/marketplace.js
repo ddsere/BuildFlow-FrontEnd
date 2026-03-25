@@ -92,3 +92,39 @@ function displayModels(models) {
     container.innerHTML += cardHtml;
   });
 }
+
+function unifiedSearch() {
+  const name = document.getElementById("nameSearch").value;
+  const price = document.getElementById("priceSearch").value;
+  const bedrooms = document.getElementById("bedroomSearch").value;
+  const container = document.getElementById("models-container");
+
+  // Loading එක පෙන්වන්න
+  container.innerHTML = `
+        <div class="text-center text-primary w-100">
+            <div class="spinner-border" role="status"></div>
+            <p class="mt-2">Filtering models...</p>
+        </div>`;
+
+  // URL එක dynamic විදිහට හදාගන්නවා
+  // ඔයාගේ API path එක /api/v1/models/search නිසා ඒක පාවිච්චි කරනවා
+  let url = new URL("http://localhost:8080/api/v1/models/search");
+
+  if (name) url.searchParams.append("name", name);
+  if (price) url.searchParams.append("maxPrice", price);
+  if (bedrooms) url.searchParams.append("minBedrooms", bedrooms);
+
+  fetch(url)
+    .then((response) => response.json())
+    .then((result) => {
+      if (result.status === 200) {
+        displayModels(result.data); // අපි කලින් හදපු function එකම පාවිච්චි කරලා ප්‍රතිඵල පෙන්වනවා
+      } else {
+        console.error("Search failed:", result.message);
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      container.innerHTML = `<p class="text-danger text-center w-100">Error connecting to server.</p>`;
+    });
+}
