@@ -84,6 +84,192 @@
       </div>
     </div>
 
+    <div
+      class="modal fade"
+      id="requestModal"
+      tabindex="-1"
+      aria-labelledby="requestModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title fw-bold" id="requestModalLabel">
+              Request Quotation
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <p class="text-muted small mb-4">
+              Fill out this form to request more information or a formal
+              quotation for the selected model.
+            </p>
+
+            <form id="requestForm">
+              <div class="mb-3">
+                <label class="form-label fw-bold">Selected House Model</label>
+                <input
+                  type="text"
+                  id="requestModelName"
+                  class="form-control bg-light"
+                  readonly
+                />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Your Name</label>
+                <input
+                  type="text"
+                  id="customerName"
+                  class="form-control"
+                  required
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Email Address</label>
+                <input
+                  type="email"
+                  id="customerEmail"
+                  class="form-control"
+                  required
+                  placeholder="john@example.com"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Phone Number</label>
+                <input
+                  type="tel"
+                  id="customerPhone"
+                  class="form-control"
+                  required
+                  placeholder="07X XXX XXXX"
+                />
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label fw-bold"
+                  >Message / Custom Requirements</label
+                >
+                <textarea
+                  id="customerMessage"
+                  class="form-control"
+                  rows="3"
+                  placeholder="E.g., I want to know if we can add an extra bathroom..."
+                ></textarea>
+              </div>
+
+              <div id="requestAlertMessage"></div>
+
+              <button type="submit" class="btn btn-primary w-100 fw-bold py-2">
+                <i class="bi bi-send"></i> Send Request
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="purchaseModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title fw-bold">
+              <i class="bi bi-credit-card"></i> Secure Checkout
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="alert alert-info text-center">
+              You are purchasing the full blueprint & plan for <br />
+              <strong><span id="purchaseModelName"></span></strong>
+              <h4 class="mt-2 text-success">
+                Rs. <span id="purchasePrice"></span>
+              </h4>
+            </div>
+
+            <form id="purchaseForm">
+              <input type="hidden" id="hiddenModelName" />
+              <input type="hidden" id="hiddenPrice" />
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Full Name</label>
+                <input
+                  type="text"
+                  id="buyerName"
+                  class="form-control"
+                  required
+                  placeholder="John Doe"
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-bold"
+                  >Email Address (To receive blueprints)</label
+                >
+                <input
+                  type="email"
+                  id="buyerEmail"
+                  class="form-control"
+                  required
+                  placeholder="john@example.com"
+                />
+              </div>
+
+              <hr />
+              <h6 class="fw-bold mb-3">Payment Details (Simulated)</h6>
+              <div class="mb-3">
+                <label class="form-label">Card Number</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="XXXX XXXX XXXX XXXX"
+                  required
+                />
+              </div>
+              <div class="row mb-4">
+                <div class="col-6">
+                  <label class="form-label">Expiry Date</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="MM/YY"
+                    required
+                  />
+                </div>
+                <div class="col-6">
+                  <label class="form-label">CVV</label>
+                  <input
+                    type="password"
+                    class="form-control"
+                    placeholder="123"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div id="purchaseAlertMessage"></div>
+
+              <button type="submit" class="btn btn-success w-100 fw-bold py-2">
+                Pay Securely & Download Plan
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script
       type="module"
       src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"

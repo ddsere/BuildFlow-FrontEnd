@@ -1,4 +1,3 @@
-// පිටුව Load වුණ ගමන් fetchModels function එක run වෙනවා
 document.addEventListener("DOMContentLoaded", () => {
   fetchModels();
 });
@@ -15,7 +14,6 @@ function fetchModels() {
       return response.json();
     })
     .then((result) => {
-      // අපේ APIResponse එකේ data කොටස ඇතුළේ තමයි models තියෙන්නේ
       if (result.status === 200) {
         displayModels(result.data);
       } else {
@@ -33,16 +31,14 @@ function fetchModels() {
 
 function displayModels(models) {
   const container = document.getElementById("models-container");
-  container.innerHTML = ""; // Loading spinner එක අයින් කරනවා
+  container.innerHTML = "";
 
   if (models.length === 0) {
     container.innerHTML = `<p class="text-center w-100">No 3D models available in the marketplace right now.</p>`;
     return;
   }
 
-  // හැම Model එකක් සඳහාම Card එකක් හදනවා
   models.forEach((model) => {
-    // අංක වලට කොමා දාන්න (උදා: 8500000 -> 8,500,000)
     const formattedPrice = model.estimatedCost
       ? model.estimatedCost.toLocaleString()
       : "N/A";
@@ -81,14 +77,22 @@ function displayModels(models) {
                                 <span>${model.floorArea} sq.ft</span>
                             </div>
                         </div>
-                        
-                        <button class="btn btn-dark w-100 mt-3 fw-semibold">Request to Build</button>
+<button class="btn btn-dark w-100 mt-3 fw-semibold" onclick="openRequestModal('${model.modelName}')">Request to Build</button>
+
+<button class="btn btn-dark w-100 mt-3 fw-semibold" onclick="openRequestModal('${model.modelId}', '${model.modelName}')">
+    Request Quotation
+</button>
+
+<button class="btn btn-outline-success w-100 mt-2 fw-bold" onclick="openPurchaseModal('${model.modelName}', ${model.estimatedCost * 0.05})">
+    Buy Plan (Advance 5%)
+</button>
+
+
                     </div>
                 </div>
             </div>
         `;
 
-    // හදපු Card එක HTML එකට එකතු කරනවා
     container.innerHTML += cardHtml;
   });
 }
@@ -99,15 +103,12 @@ function unifiedSearch() {
   const bedrooms = document.getElementById("bedroomSearch").value;
   const container = document.getElementById("models-container");
 
-  // Loading එක පෙන්වන්න
   container.innerHTML = `
         <div class="text-center text-primary w-100">
             <div class="spinner-border" role="status"></div>
             <p class="mt-2">Filtering models...</p>
         </div>`;
 
-  // URL එක dynamic විදිහට හදාගන්නවා
-  // ඔයාගේ API path එක /api/v1/models/search නිසා ඒක පාවිච්චි කරනවා
   let url = new URL("http://localhost:8080/api/v1/models/search");
 
   if (name) url.searchParams.append("name", name);
@@ -118,7 +119,7 @@ function unifiedSearch() {
     .then((response) => response.json())
     .then((result) => {
       if (result.status === 200) {
-        displayModels(result.data); // අපි කලින් හදපු function එකම පාවිච්චි කරලා ප්‍රතිඵල පෙන්වනවා
+        displayModels(result.data);
       } else {
         console.error("Search failed:", result.message);
       }
@@ -128,3 +129,219 @@ function unifiedSearch() {
       container.innerHTML = `<p class="text-danger text-center w-100">Error connecting to server.</p>`;
     });
 }
+
+function openRequestModal(modelName) {
+  document.getElementById("requestModelName").value = modelName;
+
+  const requestModal = new bootstrap.Modal(
+    document.getElementById("requestModal"),
+  );
+  requestModal.show();
+}
+
+document
+  .getElementById("requestForm")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const requestData = {
+      modelName: document.getElementById("requestModelName").value,
+      customerName: document.getElementById("customerName").value,
+      customerEmail: document.getElementById("customerEmail").value,
+      customerPhone: document.getElementById("customerPhone").value,
+      message: document.getElementById("customerMessage").value,
+    };
+
+    fetch("http://localhost:8080/api/v1/inquiries/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestData),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        const alertBox = document.getElementById("requestAlertMessage");
+        alertBox.innerHTML = `
+            <div class="alert alert-success small" role="alert">
+                Request sent successfully! We will contact you soon.
+            </div>`;
+
+        setTimeout(() => {
+          document.getElementById("requestForm").reset();
+          alertBox.innerHTML = "";
+          bootstrap.Modal.getInstance(
+            document.getElementById("requestModal"),
+          ).hide();
+        }, 2500);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        document.getElementById("requestAlertMessage").innerHTML = `
+            <div class="alert alert-danger small" role="alert">Failed to send request.</div>`;
+      });
+  });
+
+function openRequestModal(modelName) {
+  document.getElementById("requestModelName").value = modelName;
+
+  const requestModal = new bootstrap.Modal(
+    document.getElementById("requestModal"),
+  );
+  requestModal.show();
+}
+
+document
+  .getElementById("requestForm")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const requestData = {
+      modelName: document.getElementById("requestModelName").value,
+      customerName: document.getElementById("customerName").value,
+      customerEmail: document.getElementById("customerEmail").value,
+      customerPhone: document.getElementById("customerPhone").value,
+      message: document.getElementById("customerMessage").value,
+    };
+
+    fetch("http://localhost:8080/api/v1/inquiries/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestData),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        const alertBox = document.getElementById("requestAlertMessage");
+        alertBox.innerHTML = `
+            <div class="alert alert-success small" role="alert">
+                Request sent successfully! We will contact you soon.
+            </div>`;
+
+        setTimeout(() => {
+          document.getElementById("requestForm").reset();
+          alertBox.innerHTML = "";
+          bootstrap.Modal.getInstance(
+            document.getElementById("requestModal"),
+          ).hide();
+        }, 2500);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        document.getElementById("requestAlertMessage").innerHTML = `
+            <div class="alert alert-danger small" role="alert">Failed to send request.</div>`;
+      });
+  });
+
+function openPurchaseModal(modelName, advanceAmount) {
+  document.getElementById("purchaseModelName").innerText = modelName;
+  document.getElementById("purchasePrice").innerText =
+    advanceAmount.toLocaleString();
+
+  document.getElementById("hiddenModelName").value = modelName;
+  document.getElementById("hiddenPrice").value = advanceAmount;
+
+  const purchaseModal = new bootstrap.Modal(
+    document.getElementById("purchaseModal"),
+  );
+  purchaseModal.show();
+}
+
+document
+  .getElementById("purchaseForm")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const orderData = {
+      modelName: document.getElementById("hiddenModelName").value,
+      customerName: document.getElementById("buyerName").value,
+      customerEmail: document.getElementById("buyerEmail").value,
+      amountPaid: parseFloat(document.getElementById("hiddenPrice").value),
+    };
+
+    fetch("http://localhost:8080/api/v1/orders/purchase", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderData),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        const alertBox = document.getElementById("purchaseAlertMessage");
+        alertBox.innerHTML = `
+            <div class="alert alert-success small text-center" role="alert">
+                <i class="bi bi-check-circle-fill"></i> Payment Successful! <br>
+                Your blueprint will be emailed to you shortly.
+            </div>`;
+
+        setTimeout(() => {
+          document.getElementById("purchaseForm").reset();
+          alertBox.innerHTML = "";
+          bootstrap.Modal.getInstance(
+            document.getElementById("purchaseModal"),
+          ).hide();
+        }, 3000);
+      })
+      .catch((error) => {
+        console.error("Payment Error:", error);
+      });
+  });
+
+function openRequestModal(modelId, modelName) {
+  document.getElementById("requestModelName").value = modelName;
+  document.getElementById("requestForm").dataset.selectedModelId = modelId;
+
+  const requestModal = new bootstrap.Modal(
+    document.getElementById("requestModal"),
+  );
+  requestModal.show();
+}
+
+document
+  .getElementById("requestForm")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML =
+      '<span class="spinner-border spinner-border-sm"></span> Sending...';
+
+    const requestData = {
+      userId: 1,
+      modelId: parseInt(this.dataset.selectedModelId),
+      requestType: "QUOTATION",
+      status: "PENDING",
+    };
+
+    fetch("http://localhost:8080/api/v1/requests/request-quotation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestData),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        const alertBox = document.getElementById("requestAlertMessage");
+        if (result.status === 200) {
+          alertBox.innerHTML = `<div class="alert alert-success small">Quotation PDF sent to your email!</div>`;
+          setTimeout(() => {
+            this.reset();
+            bootstrap.Modal.getInstance(
+              document.getElementById("requestModal"),
+            ).hide();
+            alertBox.innerHTML = "";
+          }, 3000);
+        } else {
+          alertBox.innerHTML = `<div class="alert alert-danger small">${result.message}</div>`;
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        document.getElementById("requestAlertMessage").innerHTML =
+          `<div class="alert alert-danger small">Server Error. Please try again.</div>`;
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "Send Request";
+      });
+  });

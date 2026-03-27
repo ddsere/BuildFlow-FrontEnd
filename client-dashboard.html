@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BuildFlow - Client Dashboard</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <style>
+      .progress-card {
+        border-radius: 15px;
+        transition: 0.3s;
+      }
+      .progress-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+      .update-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+      <div class="container">
+        <a class="navbar-brand fw-bold" href="index.html text-uppercase"
+          >BuildFlow <span class="text-primary">Live</span></a
+        >
+        <div class="navbar-nav ms-auto">
+          <span class="nav-link text-white small"
+            >Project ID: <strong id="projIdLabel">#1</strong></span
+          >
+        </div>
+      </div>
+    </nav>
+
+    <div class="container my-5">
+      <div class="row">
+        <div class="col-md-4">
+          <div
+            class="card border-0 shadow-sm p-4 mb-4 progress-card text-center"
+          >
+            <h5 class="fw-bold mb-3">Construction Status</h5>
+            <div class="display-4 fw-bold text-primary mb-2">
+              <span id="totalProgress">0</span>%
+            </div>
+            <p class="text-muted small">
+              Total work completed based on the latest update.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-8">
+          <h4 class="fw-bold mb-4">Real-time Progress Updates</h4>
+          <div id="progressTimeline">
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="mt-2">Fetching updates from site...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+  </body>
+</html>
