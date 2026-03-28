@@ -1,40 +1,97 @@
 document.addEventListener("DOMContentLoaded", () => {
+  updateAuthUI(); // මුලින්ම Login status එක බලන්න
   fetchModels();
 });
 
-function fetchModels() {
-  // ඔයාගේ Spring Boot Backend URL එක
-  const apiUrl = "http://localhost:8080/api/v1/models";
+// --- Authentication Functions ---
 
-  fetch(apiUrl)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
+function updateAuthUI() {
+  const token = localStorage.getItem("authToken");
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  if (token) {
+    if (loginBtn) loginBtn.classList.add("d-none");
+    if (logoutBtn) logoutBtn.classList.remove("d-none");
+  } else {
+    if (loginBtn) loginBtn.classList.remove("d-none");
+    if (logoutBtn) logoutBtn.classList.add("d-none");
+  }
+}
+
+// Login Form Submit logic
+document.getElementById("loginForm")?.addEventListener("submit", function (e) {
+  e.preventDefault();
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+
+  fetch("http://localhost:8080/api/v1/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  })
+    .then((res) => res.json())
+    .then((result) => {
+      // මම මෙතන Console එකට දානවා Backend එකෙන් එන දේ බලාගන්න
+      console.log("Backend Response:", result);
+
+      // Spring boot එකෙන් එවන විදිහට token එකයි email එකයි ගන්න ට්‍රයි කරනවා
+      const token = result.data?.token || result.token || result.jwt;
+      const userEmail = result.data?.email || result.email || email;
+
+      // Token එකක් ඇවිත් නම් විතරක් ලොග් වෙනවා
+      if (token) {
+        localStorage.setItem("authToken", token);
+        localStorage.setItem("userEmail", userEmail);
+        location.reload();
+      } else {
+        document.getElementById("loginAlert").innerHTML =
+          `<div class="alert alert-danger small">Invalid Email or Password!</div>`;
       }
-      return response.json();
     })
+    .catch((err) => {
+      console.error("Login Error:", err);
+      document.getElementById("loginAlert").innerHTML =
+        `<div class="alert alert-danger small">System Error. Please try again.</div>`;
+    });
+});
+
+function logout() {
+  localStorage.clear();
+  location.reload();
+}
+
+function showLoginAlert() {
+  alert("Please login to proceed with the purchase or quotation!");
+  const loginModal = new bootstrap.Modal(document.getElementById("loginModal"));
+  loginModal.show();
+}
+
+// --- Data Fetching Functions ---
+
+function fetchModels() {
+  const apiUrl = "http://localhost:8080/api/v1/models";
+  fetch(apiUrl)
+    .then((response) => response.json())
     .then((result) => {
       if (result.status === 200) {
         displayModels(result.data);
-      } else {
-        console.error("Error fetching models:", result.message);
       }
     })
     .catch((error) => {
-      console.error("Backend Connection Error:", error);
+      console.error("Connection Error:", error);
       document.getElementById("models-container").innerHTML =
-        `<div class="alert alert-danger text-center w-100" role="alert">
-                    Failed to load models. Please check if the Spring Boot server is running.
-                 </div>`;
+        `<div class="alert alert-danger text-center w-100">Failed to load models. Check backend.</div>`;
     });
 }
 
 function displayModels(models) {
   const container = document.getElementById("models-container");
   container.innerHTML = "";
+  const isLoggedIn = localStorage.getItem("authToken") !== null;
 
   if (models.length === 0) {
-    container.innerHTML = `<p class="text-center w-100">No 3D models available in the marketplace right now.</p>`;
+    container.innerHTML = `<p class="text-center w-100">No 3D models available.</p>`;
     return;
   }
 
@@ -43,215 +100,123 @@ function displayModels(models) {
       ? model.estimatedCost.toLocaleString()
       : "N/A";
 
+    // Login status එක අනුව buttons වෙනස් වෙනවා
+    const actionButtons = isLoggedIn
+      ? `
+<button class="btn btn-dark w-100 mt-3 fw-semibold" onclick="downloadQuotation('${model.modelId}', event)">
+    Download Quotation (PDF)
+</button>
+            <button class="btn btn-outline-success w-100 mt-2 fw-bold" onclick="openPurchaseModal('${model.modelName}', ${model.estimatedCost * 0.05})">Buy Plan (Advance 5%)</button>
+        `
+      : `
+            <button class="btn btn-secondary w-100 mt-3 fw-semibold" onclick="showLoginAlert()">Login to Request</button>
+            <button class="btn btn-secondary w-100 mt-2 fw-bold" onclick="showLoginAlert()">Login to Buy Plan</button>
+        `;
+
     const cardHtml = `
             <div class="col-md-4 mb-4">
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-img-top bg-secondary bg-opacity-10 rounded-top d-flex justify-content-center align-items-center" style="height: 300px; position: relative;">
-                        <model-viewer 
-                            src="${model.modelUrl}" 
-                            alt="${model.modelName}" 
-                            auto-rotate 
-                            camera-controls 
-                            shadow-intensity="1"
-                            style="width: 100%; height: 100%;"
-                            camera-orbit="45deg 55deg 2.5m">
-                        </model-viewer>
+                        <model-viewer src="${model.modelUrl}" alt="${model.modelName}" auto-rotate camera-controls style="width: 100%; height: 100%;"></model-viewer>
                         <span class="badge bg-primary position-absolute top-0 end-0 m-2">3D View</span>
                     </div>
-                    
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title fw-bold text-dark">${model.modelName}</h5>
                         <p class="card-text text-muted small">${model.description}</p>
-                        
                         <div class="mt-auto bg-light p-3 rounded">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="fw-semibold">Estimated Cost:</span>
                                 <span class="text-success fw-bold">Rs. ${formattedPrice}</span>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
-                                <span><i class="bi bi-house-door"></i> Bedrooms:</span>
-                                <span>${model.numBedrooms}</span>
+                                <span>Bedrooms:</span> <span>${model.numBedrooms}</span>
                             </div>
                             <div class="d-flex justify-content-between">
-                                <span><i class="bi bi-aspect-ratio"></i> Area:</span>
-                                <span>${model.floorArea} sq.ft</span>
+                                <span>Area:</span> <span>${model.floorArea} sq.ft</span>
                             </div>
                         </div>
-<button class="btn btn-dark w-100 mt-3 fw-semibold" onclick="openRequestModal('${model.modelName}')">Request to Build</button>
-
-<button class="btn btn-dark w-100 mt-3 fw-semibold" onclick="openRequestModal('${model.modelId}', '${model.modelName}')">
-    Request Quotation
-</button>
-
-<button class="btn btn-outline-success w-100 mt-2 fw-bold" onclick="openPurchaseModal('${model.modelName}', ${model.estimatedCost * 0.05})">
-    Buy Plan (Advance 5%)
-</button>
-
-
+                        ${actionButtons}
                     </div>
                 </div>
-            </div>
-        `;
-
+            </div>`;
     container.innerHTML += cardHtml;
   });
 }
+
+// --- Search and Modal Controls ---
 
 function unifiedSearch() {
   const name = document.getElementById("nameSearch").value;
   const price = document.getElementById("priceSearch").value;
   const bedrooms = document.getElementById("bedroomSearch").value;
-  const container = document.getElementById("models-container");
-
-  container.innerHTML = `
-        <div class="text-center text-primary w-100">
-            <div class="spinner-border" role="status"></div>
-            <p class="mt-2">Filtering models...</p>
-        </div>`;
 
   let url = new URL("http://localhost:8080/api/v1/models/search");
-
   if (name) url.searchParams.append("name", name);
   if (price) url.searchParams.append("maxPrice", price);
   if (bedrooms) url.searchParams.append("minBedrooms", bedrooms);
 
   fetch(url)
-    .then((response) => response.json())
+    .then((res) => res.json())
     .then((result) => {
-      if (result.status === 200) {
-        displayModels(result.data);
-      } else {
-        console.error("Search failed:", result.message);
-      }
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      container.innerHTML = `<p class="text-danger text-center w-100">Error connecting to server.</p>`;
+      if (result.status === 200) displayModels(result.data);
     });
 }
 
-function openRequestModal(modelName) {
+function openRequestModal(modelId, modelName) {
   document.getElementById("requestModelName").value = modelName;
-
-  const requestModal = new bootstrap.Modal(
-    document.getElementById("requestModal"),
-  );
-  requestModal.show();
+  // Form එකේ Model ID එක තාවකාලිකව තියාගන්න
+  document.getElementById("requestForm").dataset.selectedModelId = modelId;
+  new bootstrap.Modal(document.getElementById("requestModal")).show();
 }
-
-document
-  .getElementById("requestForm")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    const requestData = {
-      modelName: document.getElementById("requestModelName").value,
-      customerName: document.getElementById("customerName").value,
-      customerEmail: document.getElementById("customerEmail").value,
-      customerPhone: document.getElementById("customerPhone").value,
-      message: document.getElementById("customerMessage").value,
-    };
-
-    fetch("http://localhost:8080/api/v1/inquiries/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestData),
-    })
-      .then((response) => response.json())
-      .then((result) => {
-        const alertBox = document.getElementById("requestAlertMessage");
-        alertBox.innerHTML = `
-            <div class="alert alert-success small" role="alert">
-                Request sent successfully! We will contact you soon.
-            </div>`;
-
-        setTimeout(() => {
-          document.getElementById("requestForm").reset();
-          alertBox.innerHTML = "";
-          bootstrap.Modal.getInstance(
-            document.getElementById("requestModal"),
-          ).hide();
-        }, 2500);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        document.getElementById("requestAlertMessage").innerHTML = `
-            <div class="alert alert-danger small" role="alert">Failed to send request.</div>`;
-      });
-  });
-
-function openRequestModal(modelName) {
-  document.getElementById("requestModelName").value = modelName;
-
-  const requestModal = new bootstrap.Modal(
-    document.getElementById("requestModal"),
-  );
-  requestModal.show();
-}
-
-document
-  .getElementById("requestForm")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    const requestData = {
-      modelName: document.getElementById("requestModelName").value,
-      customerName: document.getElementById("customerName").value,
-      customerEmail: document.getElementById("customerEmail").value,
-      customerPhone: document.getElementById("customerPhone").value,
-      message: document.getElementById("customerMessage").value,
-    };
-
-    fetch("http://localhost:8080/api/v1/inquiries/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestData),
-    })
-      .then((response) => response.json())
-      .then((result) => {
-        const alertBox = document.getElementById("requestAlertMessage");
-        alertBox.innerHTML = `
-            <div class="alert alert-success small" role="alert">
-                Request sent successfully! We will contact you soon.
-            </div>`;
-
-        setTimeout(() => {
-          document.getElementById("requestForm").reset();
-          alertBox.innerHTML = "";
-          bootstrap.Modal.getInstance(
-            document.getElementById("requestModal"),
-          ).hide();
-        }, 2500);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        document.getElementById("requestAlertMessage").innerHTML = `
-            <div class="alert alert-danger small" role="alert">Failed to send request.</div>`;
-      });
-  });
 
 function openPurchaseModal(modelName, advanceAmount) {
   document.getElementById("purchaseModelName").innerText = modelName;
   document.getElementById("purchasePrice").innerText =
     advanceAmount.toLocaleString();
-
   document.getElementById("hiddenModelName").value = modelName;
   document.getElementById("hiddenPrice").value = advanceAmount;
-
-  const purchaseModal = new bootstrap.Modal(
-    document.getElementById("purchaseModal"),
-  );
-  purchaseModal.show();
+  new bootstrap.Modal(document.getElementById("purchaseModal")).show();
 }
+
+// --- Form Submissions with Security Tokens ---
+
+document
+  .getElementById("requestForm")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
+    const token = localStorage.getItem("authToken");
+
+    const requestData = {
+      modelId: parseInt(this.dataset.selectedModelId),
+      customerName: document.getElementById("customerName").value,
+      customerEmail: document.getElementById("customerEmail").value,
+      customerPhone: document.getElementById("customerPhone").value,
+      message: document.getElementById("customerMessage").value,
+    };
+
+    fetch("http://localhost:8080/api/v1/requests/request-quotation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token, // Security Token එක මෙතනට යනවා
+      },
+      body: JSON.stringify(requestData),
+    })
+      .then((res) => res.json())
+      .then((result) => {
+        const alertBox = document.getElementById("requestAlertMessage");
+        if (result.status === 200) {
+          alertBox.innerHTML = `<div class="alert alert-success small">Quotation request sent!</div>`;
+          setTimeout(() => location.reload(), 2000);
+        }
+      });
+  });
 
 document
   .getElementById("purchaseForm")
   .addEventListener("submit", function (event) {
     event.preventDefault();
+    const token = localStorage.getItem("authToken");
 
     const orderData = {
       modelName: document.getElementById("hiddenModelName").value,
@@ -262,86 +227,66 @@ document
 
     fetch("http://localhost:8080/api/v1/orders/purchase", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
       body: JSON.stringify(orderData),
     })
-      .then((response) => response.json())
+      .then((res) => res.json())
       .then((result) => {
-        const alertBox = document.getElementById("purchaseAlertMessage");
-        alertBox.innerHTML = `
-            <div class="alert alert-success small text-center" role="alert">
-                <i class="bi bi-check-circle-fill"></i> Payment Successful! <br>
-                Your blueprint will be emailed to you shortly.
-            </div>`;
-
-        setTimeout(() => {
-          document.getElementById("purchaseForm").reset();
-          alertBox.innerHTML = "";
-          bootstrap.Modal.getInstance(
-            document.getElementById("purchaseModal"),
-          ).hide();
-        }, 3000);
-      })
-      .catch((error) => {
-        console.error("Payment Error:", error);
+        document.getElementById("purchaseAlertMessage").innerHTML =
+          `<div class="alert alert-success small">Payment Successful!</div>`;
+        setTimeout(() => location.reload(), 2000);
       });
   });
 
-function openRequestModal(modelId, modelName) {
-  document.getElementById("requestModelName").value = modelName;
-  document.getElementById("requestForm").dataset.selectedModelId = modelId;
+async function downloadQuotation(modelId, event) {
+  const token = localStorage.getItem("authToken");
 
-  const requestModal = new bootstrap.Modal(
-    document.getElementById("requestModal"),
-  );
-  requestModal.show();
-}
+  if (!token) {
+    showLoginAlert();
+    return;
+  }
 
-document
-  .getElementById("requestForm")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
+  // බටන් එක හරියටම අල්ලගන්නවා
+  const btn = event.target.closest("button");
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>...';
 
-    const submitBtn = event.target.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML =
-      '<span class="spinner-border spinner-border-sm"></span> Sending...';
+  const url = `http://localhost:8080/api/v1/requests/download-quotation/${modelId}`;
 
-    const requestData = {
-      userId: 1,
-      modelId: parseInt(this.dataset.selectedModelId),
-      requestType: "QUOTATION",
-      status: "PENDING",
-    };
-
-    fetch("http://localhost:8080/api/v1/requests/request-quotation", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestData),
+  fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: "Bearer " + token,
+      Accept: "application/pdf",
+    },
+  })
+    .then(async (res) => {
+      if (res.ok) {
+        const blob = await res.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = `Quotation_${modelId}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+      } else {
+        // මෙතනදී Backend එකෙන් එන JSON error එකක් තිබුණොත් ඒක බලන්න පුළුවන්
+        console.error("Server Response Error:", res.status);
+        alert("Failed to download PDF. Status: " + res.status);
+      }
     })
-      .then((response) => response.json())
-      .then((result) => {
-        const alertBox = document.getElementById("requestAlertMessage");
-        if (result.status === 200) {
-          alertBox.innerHTML = `<div class="alert alert-success small">Quotation PDF sent to your email!</div>`;
-          setTimeout(() => {
-            this.reset();
-            bootstrap.Modal.getInstance(
-              document.getElementById("requestModal"),
-            ).hide();
-            alertBox.innerHTML = "";
-          }, 3000);
-        } else {
-          alertBox.innerHTML = `<div class="alert alert-danger small">${result.message}</div>`;
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        document.getElementById("requestAlertMessage").innerHTML =
-          `<div class="alert alert-danger small">Server Error. Please try again.</div>`;
-      })
-      .finally(() => {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = "Send Request";
-      });
-  });
+    .catch((err) => {
+      console.error("Fetch Error:", err);
+      alert("Server error occurred. Please check CORS settings on Backend.");
+    })
+    .finally(() => {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    });
+}

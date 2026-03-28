@@ -16,8 +16,22 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
       <div class="container">
         <a class="navbar-brand" href="#">BuildFlow Architecture</a>
-        <div class="d-flex">
-          <button class="btn btn-outline-light">Login</button>
+        <div class="d-flex" id="auth-buttons">
+          <button
+            class="btn btn-outline-light"
+            id="loginBtn"
+            data-bs-toggle="modal"
+            data-bs-target="#loginModal"
+          >
+            Login
+          </button>
+          <button
+            class="btn btn-danger d-none"
+            id="logoutBtn"
+            onclick="logout()"
+          >
+            Logout
+          </button>
         </div>
       </div>
     </nav>
@@ -263,6 +277,49 @@
 
               <button type="submit" class="btn btn-success w-100 fw-bold py-2">
                 Pay Securely & Download Plan
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title fw-bold">Login to BuildFlow</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <form id="loginForm">
+              <div class="mb-3">
+                <label class="form-label fw-bold">Email Address</label>
+                <input
+                  type="email"
+                  id="loginEmail"
+                  class="form-control"
+                  required
+                  placeholder="name@example.com"
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-bold">Password</label>
+                <input
+                  type="password"
+                  id="loginPassword"
+                  class="form-control"
+                  required
+                  placeholder="********"
+                />
+              </div>
+              <div id="loginAlert"></div>
+              <button type="submit" class="btn btn-primary w-100 fw-bold py-2">
+                Login
               </button>
             </form>
           </div>
