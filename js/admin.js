@@ -91,8 +91,20 @@ async function loadInquiries() {
           year: "numeric",
         });
 
-        // Note: Use inquiry.id or inquiry.inquiryId based on your backend DTO
-        const currentId = inquiry.id || inquiry.inquiryId;
+        const currentId =
+          inquiry.id || inquiry.inquiryId || inquiry.requestId || "";
+
+        // 💡 1. Status එක මොකක්ද කියලා චෙක් කරනවා
+        const isApproved = inquiry.status === "APPROVED";
+
+        // 💡 2. Status එක අනුව Button එකේ HTML එක වෙනස් කරනවා
+        const approveButtonHtml = isApproved
+          ? `<button class="btn btn-sm btn-secondary shadow-sm rounded-pill px-3 w-100 mt-1" disabled>
+                           <i class="bi bi-check2-all me-1"></i>Approved
+                       </button>`
+          : `<button onclick="openApproveModal('${currentId}', '${inquiry.customerName}', '${inquiry.modelName}')" class="btn btn-sm btn-success shadow-sm rounded-pill px-3 w-100 mt-1">
+                           <i class="bi bi-check-lg me-1"></i>Approve
+                       </button>`;
 
         const row = `
                     <tr>
@@ -117,9 +129,7 @@ async function loadInquiries() {
                                 <i class="bi bi-reply-fill me-1"></i>Reply
                             </button>
                             <br>
-                            <button onclick="openApproveModal('${currentId}', '${inquiry.customerName}', '${inquiry.modelName}')" class="btn btn-sm btn-success shadow-sm rounded-pill px-3 w-100 mt-1">
-                                <i class="bi bi-check-lg me-1"></i>Approve
-                            </button>
+                            ${approveButtonHtml}
                         </td>
                     </tr>`;
         tableBody.innerHTML += row;
@@ -213,6 +223,14 @@ document
   .getElementById("approveForm")
   ?.addEventListener("submit", async function (event) {
     event.preventDefault();
+
+    const rawId = document.getElementById("approveInquiryId").value;
+    if (!rawId || rawId === "undefined" || rawId === "null") {
+      document.getElementById("approveAlertMessage").innerHTML =
+        `<div class="alert alert-danger small shadow-sm">Error: Inquiry ID is missing! Please refresh the page.</div>`;
+      return; // වැඩේ මෙතනින් නතර කරනවා, Backend එකට යවන්නේ නෑ
+    }
+
     const submitBtn = document.getElementById("confirmApproveBtn");
     const originalBtnText = submitBtn.innerHTML;
 
@@ -221,7 +239,7 @@ document
       '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
 
     const orderData = {
-      inquiryId: parseInt(document.getElementById("approveInquiryId").value),
+      inquiryId: parseInt(rawId), // මෙතන හරියටම අංකයක් විදිහට යනවා
       customSpecs: document.getElementById("approveSpecs").value,
       finalPrice: parseFloat(document.getElementById("approvePrice").value),
     };
@@ -347,11 +365,11 @@ document
     // මේ Data ටික ඔයාගේ ProgressUpdateDTO එකට ගැලපෙන්න ඕනේ
     const progressData = {
       projectId: parseInt(document.getElementById("updateProjectId").value),
-      updateMessage: document.getElementById("updateMessage").value,
-      completionPercentage: parseInt(
+      description: document.getElementById("updateMessage").value, // updateMessage වෙනුවට description
+      percentageComplete: parseInt(
         document.getElementById("updatePercentage").value,
-      ),
-      imageUrl: document.getElementById("updateImageUrl").value,
+      ), // completionPercentage වෙනුවට percentageComplete
+      photoUrl: document.getElementById("updateImageUrl").value, // imageUrl වෙනුවට photoUrl
     };
 
     const token = localStorage.getItem("authToken");
