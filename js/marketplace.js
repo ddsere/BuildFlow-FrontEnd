@@ -1,10 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
-  updateAuthUI(); // මුලින්ම Login status එක බලන්න
+  updateAuthUI();
   fetchModels();
 });
 
 // --- Authentication Functions ---
-
 function updateAuthUI() {
   const token = localStorage.getItem("authToken");
   const loginBtn = document.getElementById("loginBtn");
@@ -19,7 +18,6 @@ function updateAuthUI() {
   }
 }
 
-// Login Form Submit logic
 document.getElementById("loginForm")?.addEventListener("submit", function (e) {
   e.preventDefault();
   const email = document.getElementById("loginEmail").value;
@@ -32,14 +30,9 @@ document.getElementById("loginForm")?.addEventListener("submit", function (e) {
   })
     .then((res) => res.json())
     .then((result) => {
-      // මම මෙතන Console එකට දානවා Backend එකෙන් එන දේ බලාගන්න
-      console.log("Backend Response:", result);
-
-      // Spring boot එකෙන් එවන විදිහට token එකයි email එකයි ගන්න ට්‍රයි කරනවා
       const token = result.data?.token || result.token || result.jwt;
       const userEmail = result.data?.email || result.email || email;
 
-      // Token එකක් ඇවිත් නම් විතරක් ලොග් වෙනවා
       if (token) {
         localStorage.setItem("authToken", token);
         localStorage.setItem("userEmail", userEmail);
@@ -62,13 +55,12 @@ function logout() {
 }
 
 function showLoginAlert() {
-  alert("Please login to proceed with the purchase or quotation!");
+  alert("Please login to proceed!");
   const loginModal = new bootstrap.Modal(document.getElementById("loginModal"));
   loginModal.show();
 }
 
-// --- Data Fetching Functions ---
-
+// --- Data Fetching & Display ---
 function fetchModels() {
   const apiUrl = "http://localhost:8080/api/v1/models";
   fetch(apiUrl)
@@ -100,50 +92,48 @@ function displayModels(models) {
       ? model.estimatedCost.toLocaleString()
       : "N/A";
 
-    // Login status එක අනුව buttons වෙනස් වෙනවා
+    // Aluth Inquiry Button eka methanata damma
     const actionButtons = isLoggedIn
       ? `
-<button class="btn btn-dark w-100 mt-3 fw-semibold" onclick="downloadQuotation('${model.modelId}', event)">
-    Download Quotation (PDF)
-</button>
-            <button class="btn btn-outline-success w-100 mt-2 fw-bold" onclick="openPurchaseModal('${model.modelName}', ${model.estimatedCost * 0.05})">Buy Plan (Advance 5%)</button>
+          <button class="btn btn-dark w-100 mt-3 fw-semibold" onclick="downloadQuotation('${model.modelId}', event)">Download Quotation (PDF)</button>
+          <button class="btn btn-outline-success w-100 mt-2 fw-bold" onclick="openPurchaseModal('${model.modelName}', ${model.estimatedCost * 0.05})">Buy Plan (Advance 5%)</button>
+          <button class="btn btn-outline-primary w-100 mt-2 fw-bold" onclick="openInquiryModal('${model.modelName}')">Send Inquiry</button>
         `
       : `
-            <button class="btn btn-secondary w-100 mt-3 fw-semibold" onclick="showLoginAlert()">Login to Request</button>
-            <button class="btn btn-secondary w-100 mt-2 fw-bold" onclick="showLoginAlert()">Login to Buy Plan</button>
+          <button class="btn btn-secondary w-100 mt-3 fw-semibold" onclick="showLoginAlert()">Login to Request</button>
+          <button class="btn btn-secondary w-100 mt-2 fw-bold" onclick="showLoginAlert()">Login to Buy Plan</button>
+          <button class="btn btn-secondary w-100 mt-2 fw-bold" onclick="showLoginAlert()">Login to Inquire</button>
         `;
 
     const cardHtml = `
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-img-top bg-secondary bg-opacity-10 rounded-top d-flex justify-content-center align-items-center" style="height: 300px; position: relative;">
-                        <model-viewer src="${model.modelUrl}" alt="${model.modelName}" auto-rotate camera-controls style="width: 100%; height: 100%;"></model-viewer>
-                        <span class="badge bg-primary position-absolute top-0 end-0 m-2">3D View</span>
-                    </div>
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title fw-bold text-dark">${model.modelName}</h5>
-                        <p class="card-text text-muted small">${model.description}</p>
-                        <div class="mt-auto bg-light p-3 rounded">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="fw-semibold">Estimated Cost:</span>
-                                <span class="text-success fw-bold">Rs. ${formattedPrice}</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Bedrooms:</span> <span>${model.numBedrooms}</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span>Area:</span> <span>${model.floorArea} sq.ft</span>
-                            </div>
-                        </div>
-                        ${actionButtons}
-                    </div>
-                </div>
-            </div>`;
+      <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+          <div class="card-img-top bg-secondary bg-opacity-10 rounded-top d-flex justify-content-center align-items-center" style="height: 300px; position: relative;">
+            <model-viewer src="${model.modelUrl}" alt="${model.modelName}" auto-rotate camera-controls style="width: 100%; height: 100%;"></model-viewer>
+            <span class="badge bg-primary position-absolute top-0 end-0 m-2">3D View</span>
+          </div>
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title fw-bold text-dark">${model.modelName}</h5>
+            <p class="card-text text-muted small">${model.description}</p>
+            <div class="mt-auto bg-light p-3 rounded">
+              <div class="d-flex justify-content-between mb-2">
+                <span class="fw-semibold">Estimated Cost:</span>
+                <span class="text-success fw-bold">Rs. ${formattedPrice}</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Bedrooms:</span> <span>${model.numBedrooms}</span>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span>Area:</span> <span>${model.floorArea} sq.ft</span>
+              </div>
+            </div>
+            ${actionButtons}
+          </div>
+        </div>
+      </div>`;
     container.innerHTML += cardHtml;
   });
 }
-
-// --- Search and Modal Controls ---
 
 function unifiedSearch() {
   const name = document.getElementById("nameSearch").value;
@@ -162,13 +152,7 @@ function unifiedSearch() {
     });
 }
 
-function openRequestModal(modelId, modelName) {
-  document.getElementById("requestModelName").value = modelName;
-  // Form එකේ Model ID එක තාවකාලිකව තියාගන්න
-  document.getElementById("requestForm").dataset.selectedModelId = modelId;
-  new bootstrap.Modal(document.getElementById("requestModal")).show();
-}
-
+// --- Modals ---
 function openPurchaseModal(modelName, advanceAmount) {
   document.getElementById("purchaseModelName").innerText = modelName;
   document.getElementById("purchasePrice").innerText =
@@ -178,40 +162,19 @@ function openPurchaseModal(modelName, advanceAmount) {
   new bootstrap.Modal(document.getElementById("purchaseModal")).show();
 }
 
-// --- Form Submissions with Security Tokens ---
+function openInquiryModal(modelName) {
+  document.getElementById("inquiryModelName").value = modelName;
 
-document
-  .getElementById("requestForm")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
-    const token = localStorage.getItem("authToken");
+  // LocalStorage eken email eka aran auto fill karanawa
+  const savedEmail = localStorage.getItem("userEmail");
+  if (savedEmail) {
+    document.getElementById("inquiryCustomerEmail").value = savedEmail;
+  }
 
-    const requestData = {
-      modelId: parseInt(this.dataset.selectedModelId),
-      customerName: document.getElementById("customerName").value,
-      customerEmail: document.getElementById("customerEmail").value,
-      customerPhone: document.getElementById("customerPhone").value,
-      message: document.getElementById("customerMessage").value,
-    };
+  new bootstrap.Modal(document.getElementById("inquiryModal")).show();
+}
 
-    fetch("http://localhost:8080/api/v1/requests/request-quotation", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token, // Security Token එක මෙතනට යනවා
-      },
-      body: JSON.stringify(requestData),
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        const alertBox = document.getElementById("requestAlertMessage");
-        if (result.status === 200) {
-          alertBox.innerHTML = `<div class="alert alert-success small">Quotation request sent!</div>`;
-          setTimeout(() => location.reload(), 2000);
-        }
-      });
-  });
-
+// --- Form Submissions ---
 document
   .getElementById("purchaseForm")
   .addEventListener("submit", function (event) {
@@ -241,15 +204,70 @@ document
       });
   });
 
+// Aluth Inquiry Submit Logic Eka
+document
+  .getElementById("inquiryForm")
+  ?.addEventListener("submit", function (event) {
+    event.preventDefault();
+    const token = localStorage.getItem("authToken");
+
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML =
+      '<span class="spinner-border spinner-border-sm"></span> Sending...';
+
+    const inquiryData = {
+      modelName: document.getElementById("inquiryModelName").value,
+      customerName: document.getElementById("inquiryCustomerName").value,
+      customerEmail: document.getElementById("inquiryCustomerEmail").value,
+      customerPhone: document.getElementById("inquiryCustomerPhone").value,
+      message: document.getElementById("inquiryMessage").value,
+    };
+
+    fetch("http://localhost:8080/api/v1/inquiries/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+      body: JSON.stringify(inquiryData),
+    })
+      .then((res) => res.json())
+      .then((result) => {
+        const alertBox = document.getElementById("inquiryAlertMessage");
+        if (result.status === 200) {
+          alertBox.innerHTML = `<div class="alert alert-success small"><i class="bi bi-check-circle"></i> Inquiry sent successfully! Email confirmation sent.</div>`;
+          setTimeout(() => {
+            const modalInst = bootstrap.Modal.getInstance(
+              document.getElementById("inquiryModal"),
+            );
+            modalInst.hide();
+            this.reset();
+            alertBox.innerHTML = "";
+          }, 2500);
+        } else {
+          alertBox.innerHTML = `<div class="alert alert-danger small">Failed: ${result.message}</div>`;
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        document.getElementById("inquiryAlertMessage").innerHTML =
+          `<div class="alert alert-danger small">Network error! Please try again.</div>`;
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      });
+  });
+
 async function downloadQuotation(modelId, event) {
   const token = localStorage.getItem("authToken");
-
   if (!token) {
     showLoginAlert();
     return;
   }
 
-  // බටන් එක හරියටම අල්ලගන්නවා
   const btn = event.target.closest("button");
   const originalText = btn.innerHTML;
   btn.disabled = true;
@@ -276,14 +294,12 @@ async function downloadQuotation(modelId, event) {
         link.remove();
         window.URL.revokeObjectURL(downloadUrl);
       } else {
-        // මෙතනදී Backend එකෙන් එන JSON error එකක් තිබුණොත් ඒක බලන්න පුළුවන්
-        console.error("Server Response Error:", res.status);
         alert("Failed to download PDF. Status: " + res.status);
       }
     })
     .catch((err) => {
       console.error("Fetch Error:", err);
-      alert("Server error occurred. Please check CORS settings on Backend.");
+      alert("Server error occurred.");
     })
     .finally(() => {
       btn.disabled = false;

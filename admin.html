@@ -8,16 +8,37 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <style>
+      body {
+        background-color: #f4f6f9;
+      }
+      .card {
+        border-radius: 12px;
+      }
+      .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+      }
+    </style>
   </head>
-  <body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
       <div class="container">
-        <a class="navbar-brand fw-bold text-warning" href="#"
-          >BuildFlow ADMIN</a
-        >
-        <div class="d-flex">
-          <a href="index.html" class="btn btn-outline-light"
-            >Go to Marketplace</a
+        <a class="navbar-brand fw-bold text-warning" href="#">
+          <i class="bi bi-building-gear me-2"></i>BuildFlow ADMIN
+        </a>
+        <div class="d-flex align-items-center">
+          <span class="text-light me-3 small"
+            ><i class="bi bi-person-circle me-1"></i> Admin</span
+          >
+          <a href="index.html" class="btn btn-sm btn-outline-light"
+            ><i class="bi bi-box-arrow-up-right me-1"></i> Go to Marketplace</a
           >
         </div>
       </div>
@@ -25,74 +46,105 @@
 
     <div class="container mb-5">
       <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-lg-10 mb-5">
           <div class="card shadow-sm border-0">
-            <div class="card-header bg-primary text-white text-center py-3">
-              <h4 class="mb-0">Add New 3D House Model</h4>
+            <div class="card-header bg-primary text-white py-3">
+              <h5 class="mb-0 fw-bold">
+                <i class="bi bi-house-add me-2"></i>Add New 3D House Model
+              </h5>
             </div>
-            <div class="card-body p-4">
+            <div class="card-body p-4 bg-white">
               <div id="alertMessage"></div>
-
               <form id="addModelForm">
-                <div class="mb-3">
-                  <label class="form-label fw-bold">Model Name</label>
-                  <input
-                    type="text"
-                    id="modelName"
-                    class="form-control"
-                    required
-                    placeholder="e.g. Modern Villa"
-                  />
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label fw-semibold text-muted small"
+                      >Model Name</label
+                    >
+                    <input
+                      type="text"
+                      id="modelName"
+                      class="form-control"
+                      required
+                      placeholder="e.g. Modern Luxury Villa"
+                    />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label fw-semibold text-muted small"
+                      >Image Cover Path (.jpg/.png)</label
+                    >
+                    <input
+                      type="text"
+                      id="imgUrl"
+                      class="form-control"
+                      required
+                      placeholder="e.g. assets/images/cover.jpg"
+                    />
+                  </div>
                 </div>
-
                 <div class="mb-3">
-                  <label class="form-label fw-bold">Description</label>
+                  <label class="form-label fw-semibold text-muted small"
+                    >Description</label
+                  >
                   <textarea
                     id="description"
                     class="form-control"
                     rows="3"
                     required
-                    placeholder="Brief description about the house..."
+                    placeholder="Brief description about the house design and features..."
                   ></textarea>
                 </div>
-
-                <div class="row">
-                  <div class="col-md-4 mb-3">
-                    <label class="form-label fw-bold"
+                <div class="row bg-light p-3 rounded mb-3 mx-0 border">
+                  <div class="col-md-4 mb-2 mb-md-0">
+                    <label class="form-label fw-semibold text-muted small"
                       >Estimated Cost (Rs.)</label
                     >
-                    <input
-                      type="number"
-                      id="estimatedCost"
-                      class="form-control"
-                      required
-                      placeholder="e.g. 8500000"
-                    />
+                    <div class="input-group">
+                      <span class="input-group-text bg-white">Rs.</span>
+                      <input
+                        type="number"
+                        id="estimatedCost"
+                        class="form-control"
+                        required
+                        placeholder="8500000"
+                      />
+                    </div>
                   </div>
-                  <div class="col-md-4 mb-3">
-                    <label class="form-label fw-bold">Floor Area (sq.ft)</label>
-                    <input
-                      type="number"
-                      id="floorArea"
-                      class="form-control"
-                      required
-                      placeholder="e.g. 1500"
-                    />
+                  <div class="col-md-4 mb-2 mb-md-0">
+                    <label class="form-label fw-semibold text-muted small"
+                      >Floor Area (sq.ft)</label
+                    >
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        id="floorArea"
+                        class="form-control"
+                        required
+                        placeholder="1500"
+                      />
+                      <span class="input-group-text bg-white">sq.ft</span>
+                    </div>
                   </div>
-                  <div class="col-md-4 mb-3">
-                    <label class="form-label fw-bold">Bedrooms</label>
-                    <input
-                      type="number"
-                      id="numBedrooms"
-                      class="form-control"
-                      required
-                      placeholder="e.g. 3"
-                    />
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold text-muted small"
+                      >Bedrooms</label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text bg-white"
+                        ><i class="bi bi-door-open"></i
+                      ></span>
+                      <input
+                        type="number"
+                        id="numBedrooms"
+                        class="form-control"
+                        required
+                        placeholder="3"
+                      />
+                    </div>
                   </div>
                 </div>
-
-                <div class="mb-3">
-                  <label class="form-label fw-bold"
+                <div class="mb-4">
+                  <label class="form-label fw-semibold text-muted small"
                     >3D Model File Path (.glb)</label
                   >
                   <input
@@ -102,78 +154,370 @@
                     required
                     placeholder="e.g. assets/models/my_house.glb"
                   />
-                  <small class="text-muted"
-                    >Make sure the file is inside the assets/models
-                    folder.</small
-                  >
+                  <div class="form-text text-secondary">
+                    <i class="bi bi-info-circle me-1"></i>Ensure the file is
+                    uploaded to the assets/models folder before saving.
+                  </div>
                 </div>
-
-                <div class="mb-4">
-                  <label class="form-label fw-bold"
-                    >Image Cover Path (.jpg/.png)</label
-                  >
-                  <input
-                    type="text"
-                    id="imgUrl"
-                    class="form-control"
-                    required
-                    placeholder="e.g. assets/images/cover.jpg"
-                  />
-                </div>
-
                 <button
                   type="submit"
-                  class="btn btn-primary w-100 fw-bold py-2"
+                  class="btn btn-primary w-100 fw-bold py-2 shadow-sm"
+                  id="saveModelBtn"
                 >
-                  Save Model to Database
+                  <i class="bi bi-cloud-arrow-up me-2"></i>Save Model to
+                  Database
                 </button>
               </form>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="row justify-content-center mt-5">
-      <div class="col-md-10">
-        <div class="card shadow-sm border-0">
-          <div
-            class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center"
-          >
-            <h5 class="mb-0">Customer Inquiries & Requests</h5>
-            <button
-              class="btn btn-sm btn-outline-light"
-              onclick="loadInquiries()"
+        <div class="col-lg-10">
+          <div class="card shadow-sm border-0">
+            <div
+              class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center"
             >
-              Refresh
-            </button>
-          </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover mb-0">
-                <thead class="table-light">
-                  <tr>
-                    <th>Date</th>
-                    <th>Customer Info</th>
-                    <th>Requested Model</th>
-                    <th>Message</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody id="inquiriesTableBody">
-                  <tr>
-                    <td colspan="5" class="text-center py-4 text-muted">
-                      Loading inquiries...
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <h5 class="mb-0 fw-bold">
+                <i class="bi bi-envelope-paper me-2"></i>Customer Inquiries &
+                Requests
+              </h5>
+              <button
+                class="btn btn-sm btn-outline-light"
+                onclick="loadInquiries()"
+              >
+                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+              </button>
+            </div>
+            <div class="card-body p-0">
+              <div
+                class="table-responsive"
+                style="max-height: 500px; overflow-y: auto"
+              >
+                <table
+                  class="table table-hover table-borderless table-striped mb-0 align-middle"
+                >
+                  <thead class="table-light sticky-top">
+                    <tr>
+                      <th class="ps-4">Date</th>
+                      <th>Customer Info</th>
+                      <th>Requested Model</th>
+                      <th>Message</th>
+                      <th class="pe-4 text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="inquiriesTableBody">
+                    <tr>
+                      <td colspan="5" class="text-center py-5 text-muted">
+                        <div
+                          class="spinner-border spinner-border-sm text-primary me-2"
+                          role="status"
+                        ></div>
+                        Loading inquiries...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
+    <div class="col-lg-10 mt-5">
+      <div class="card shadow-sm border-0">
+        <div
+          class="card-header bg-warning text-dark py-3 d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0 fw-bold">
+            <i class="bi bi-cone-striped me-2"></i>Ongoing Construction Projects
+          </h5>
+          <button class="btn btn-sm btn-dark" onclick="loadProjects()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+          </button>
+        </div>
+        <div class="card-body p-0">
+          <div
+            class="table-responsive"
+            style="max-height: 400px; overflow-y: auto"
+          >
+            <table
+              class="table table-hover table-borderless table-striped mb-0 align-middle"
+            >
+              <thead class="table-light sticky-top">
+                <tr>
+                  <th class="ps-4">Project ID</th>
+                  <th>Customer</th>
+                  <th>Model/Plan</th>
+                  <th>Progress</th>
+                  <th class="pe-4 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="projectsTableBody">
+                <tr>
+                  <td colspan="5" class="text-center py-5 text-muted">
+                    <div
+                      class="spinner-border spinner-border-sm text-warning me-2"
+                      role="status"
+                    ></div>
+                    Loading projects...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="replyModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title fw-bold">
+              <i class="bi bi-reply-fill me-2"></i>Reply to Customer
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <div id="replyAlertMessage"></div>
+            <form id="replyForm">
+              <div class="mb-3">
+                <label class="form-label fw-bold small text-muted">To:</label>
+                <input
+                  type="email"
+                  id="replyEmail"
+                  class="form-control bg-light"
+                  readonly
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-bold small text-muted"
+                  >Subject:</label
+                >
+                <input
+                  type="text"
+                  id="replySubject"
+                  class="form-control"
+                  required
+                />
+              </div>
+              <div class="mb-4">
+                <label class="form-label fw-bold small text-muted"
+                  >Message:</label
+                >
+                <textarea
+                  id="replyMessage"
+                  class="form-control"
+                  rows="6"
+                  required
+                  placeholder="Type your professional reply here..."
+                ></textarea>
+              </div>
+              <button
+                type="submit"
+                class="btn btn-primary w-100 fw-bold py-2 shadow-sm"
+                id="sendReplyBtn"
+              >
+                <i class="bi bi-send-fill me-2"></i>Send Email
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header bg-success bg-gradient text-white border-0">
+            <h5 class="modal-title fw-bold">
+              <i class="bi bi-check-circle-fill me-2"></i>Approve Custom Request
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body p-4 bg-light">
+            <div id="approveAlertMessage"></div>
+            <div class="alert alert-info border-0 shadow-sm small mb-4">
+              <i class="bi bi-info-circle-fill me-2"></i>Approving this request
+              will create a new Custom Order and send a confirmation email to
+              the customer.
+            </div>
+            <form id="approveForm">
+              <input type="hidden" id="approveInquiryId" />
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-muted"
+                    >Customer Name</label
+                  >
+                  <input
+                    type="text"
+                    id="approveCustomerName"
+                    class="form-control bg-white"
+                    readonly
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-muted"
+                    >Requested Model</label
+                  >
+                  <input
+                    type="text"
+                    id="approveModelName"
+                    class="form-control bg-white"
+                    readonly
+                  />
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-bold small text-dark"
+                  >Approved Custom Specifications
+                  <span class="text-danger">*</span></label
+                >
+                <textarea
+                  id="approveSpecs"
+                  class="form-control border-secondary-subtle"
+                  rows="3"
+                  required
+                  placeholder="E.g., Added an extra bathroom and expanded the kitchen area..."
+                ></textarea>
+              </div>
+              <div class="mb-4">
+                <label class="form-label fw-bold small text-dark"
+                  >Final Estimated Cost (Rs.)
+                  <span class="text-danger">*</span></label
+                >
+                <div class="input-group">
+                  <span
+                    class="input-group-text bg-white border-secondary-subtle"
+                    >Rs.</span
+                  >
+                  <input
+                    type="number"
+                    id="approvePrice"
+                    class="form-control border-secondary-subtle"
+                    required
+                    placeholder="e.g. 9500000"
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                class="btn btn-success w-100 fw-bold py-2 shadow-sm"
+                id="confirmApproveBtn"
+              >
+                <i class="bi bi-file-earmark-check-fill me-2"></i>Confirm &
+                Create Order
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="progressModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header bg-warning text-dark border-0">
+            <h5 class="modal-title fw-bold">
+              <i class="bi bi-hammer me-2"></i>Update Project Progress
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body p-4 bg-light">
+            <div id="progressAlertMessage"></div>
+            <form id="progressForm">
+              <input type="hidden" id="updateProjectId" />
+
+              <div class="mb-3">
+                <label class="form-label fw-bold small text-muted"
+                  >Selected Project</label
+                >
+                <input
+                  type="text"
+                  id="updateProjectName"
+                  class="form-control bg-white fw-bold text-primary"
+                  readonly
+                />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold small text-dark"
+                  >Update Description <span class="text-danger">*</span></label
+                >
+                <textarea
+                  id="updateMessage"
+                  class="form-control border-secondary-subtle"
+                  rows="3"
+                  required
+                  placeholder="E.g., Foundation work completed successfully."
+                ></textarea>
+              </div>
+
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-dark"
+                    >Overall Completion (%)
+                    <span class="text-danger">*</span></label
+                  >
+                  <div class="input-group">
+                    <input
+                      type="number"
+                      id="updatePercentage"
+                      class="form-control border-secondary-subtle"
+                      required
+                      min="1"
+                      max="100"
+                      placeholder="e.g. 25"
+                    />
+                    <span
+                      class="input-group-text bg-white border-secondary-subtle"
+                      >%</span
+                    >
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-dark"
+                    >Image URL (Optional)</label
+                  >
+                  <input
+                    type="text"
+                    id="updateImageUrl"
+                    class="form-control border-secondary-subtle"
+                    placeholder="assets/images/progress1.jpg"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                class="btn btn-warning w-100 fw-bold py-2 shadow-sm"
+                id="saveProgressBtn"
+              >
+                <i class="bi bi-cloud-upload-fill me-2"></i>Save Progress Update
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/admin.js"></script>
   </body>
 </html>
