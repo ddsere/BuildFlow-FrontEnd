@@ -3,521 +3,844 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BuildFlow - Admin Dashboard</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <title>Admin Dashboard — BuildFlow</title>
+    <link rel="stylesheet" href="css/style.css" />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
     />
     <style>
-      body {
-        background-color: #f4f6f9;
+      .container {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 24px;
       }
-      .card {
-        border-radius: 12px;
+
+      .tab-content {
+        display: none;
       }
-      .table th {
-        font-weight: 600;
-        text-transform: uppercase;
+      .tab-content.active {
+        display: block;
+        animation: fadeInUp 0.3s ease;
+      }
+
+      .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), #b07830);
+        color: white;
         font-size: 0.85rem;
-        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-family: "Playfair Display", serif;
+      }
+
+      /* Full-width layout without sidebar for admin */
+      .admin-layout {
+        max-width: 1380px;
+        margin: 0 auto;
+        padding: 0;
+      }
+
+      .admin-nav-tabs {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 0 32px;
+        display: flex;
+        gap: 0;
+        position: sticky;
+        top: var(--nav-height);
+        z-index: 99;
+      }
+
+      .admin-nav-tab {
+        padding: 16px 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        border: none;
+        background: none;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .admin-nav-tab:hover {
+        color: var(--primary);
+      }
+      .admin-nav-tab.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+      }
+
+      .admin-tab-body {
+        padding: 28px 32px;
+      }
+
+      .no-project-card {
+        background: var(--surface);
+        border: 2px dashed var(--border);
+        border-radius: var(--radius-lg);
+        padding: 60px 32px;
+        text-align: center;
+      }
+
+      /* Badge count on tab */
+      .tab-badge {
+        background: var(--danger);
+        color: white;
+        font-size: 0.65rem;
+        padding: 2px 6px;
+        border-radius: 100px;
+        font-weight: 700;
       }
     </style>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
-      <div class="container">
-        <a class="navbar-brand fw-bold text-warning" href="#">
-          <i class="bi bi-building-gear me-2"></i>BuildFlow ADMIN
+    <!-- Navbar -->
+    <nav class="bf-nav">
+      <div
+        style="
+          max-width: 1380px;
+          margin: 0 auto;
+          padding: 0 32px;
+          display: flex;
+          align-items: center;
+          height: 100%;
+          justify-content: space-between;
+        "
+      >
+        <a href="index.html" class="bf-logo">
+          <div
+            class="bf-logo-icon"
+            style="background: linear-gradient(135deg, var(--accent), #b07830)"
+          >
+            <i class="bi bi-building-gear"></i>
+          </div>
+          Build<span>Flow</span>
+          <span
+            style="
+              font-size: 0.7rem;
+              background: var(--accent);
+              color: white;
+              padding: 2px 8px;
+              border-radius: 100px;
+              margin-left: 4px;
+              font-family: &quot;DM Sans&quot;, sans-serif;
+              font-weight: 700;
+              letter-spacing: 0.5px;
+            "
+            >ADMIN</span
+          >
         </a>
-        <div class="d-flex align-items-center">
-          <span class="text-light me-3 small"
-            ><i class="bi bi-person-circle me-1"></i> Admin</span
-          >
-          <a href="index.html" class="btn btn-sm btn-outline-light"
-            ><i class="bi bi-box-arrow-up-right me-1"></i> Go to Marketplace</a
-          >
+        <div style="display: flex; align-items: center; gap: 12px">
+          <a href="marketplace.html" class="btn-bf btn-ghost-bf btn-sm-bf">
+            <i class="bi bi-grid-3x3-gap"></i> Marketplace
+          </a>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <div class="user-avatar">A</div>
+            <span
+              style="
+                font-size: 0.82rem;
+                font-weight: 600;
+                color: var(--text-primary);
+              "
+              >Admin</span
+            >
+          </div>
+          <button class="btn-bf btn-ghost-bf btn-sm-bf" onclick="logout()">
+            <i class="bi bi-box-arrow-right"></i>
+          </button>
         </div>
       </div>
     </nav>
 
-    <div class="container mb-5">
-      <div class="row justify-content-center">
-        <div class="col-lg-10 mb-5">
-          <div class="card shadow-sm border-0">
-            <div class="card-header bg-primary text-white py-3">
-              <h5 class="mb-0 fw-bold">
-                <i class="bi bi-house-add me-2"></i>Add New 3D House Model
-              </h5>
+    <!-- Admin Tab Navigation -->
+    <div class="admin-nav-tabs">
+      <button
+        class="admin-nav-tab active"
+        onclick="showAdminTab('overview', this)"
+      >
+        <i class="bi bi-grid-1x2"></i> Overview
+      </button>
+      <button class="admin-nav-tab" onclick="showAdminTab('models', this)">
+        <i class="bi bi-house-add"></i> Add Model
+      </button>
+      <button
+        class="admin-nav-tab"
+        onclick="showAdminTab('inquiries', this)"
+        id="inquiriesTab"
+      >
+        <i class="bi bi-envelope-paper"></i> Inquiries
+      </button>
+      <button class="admin-nav-tab" onclick="showAdminTab('projects', this)">
+        <i class="bi bi-cone-striped"></i> Projects
+      </button>
+    </div>
+
+    <!-- ── OVERVIEW TAB ── -->
+    <div id="tab-overview" class="tab-content active">
+      <div class="admin-tab-body">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Admin Overview</div>
+            <div class="page-subtitle">Platform summary and quick actions</div>
+          </div>
+          <button
+            class="btn-bf btn-primary-bf btn-sm-bf"
+            onclick="refreshAll()"
+          >
+            <i class="bi bi-arrow-clockwise"></i> Refresh All
+          </button>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid-4 section-gap" id="adminStats">
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <i class="bi bi-envelope-paper"></i>
             </div>
-            <div class="card-body p-4 bg-white">
-              <div id="alertMessage"></div>
+            <div class="stat-content">
+              <div class="stat-label">Total Inquiries</div>
+              <div class="stat-value" id="statInquiries">—</div>
+              <div class="stat-sub">Customer requests</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon amber">
+              <i class="bi bi-clock-history"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Pending Inquiries</div>
+              <div class="stat-value" id="statPending">—</div>
+              <div class="stat-sub">Awaiting approval</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">
+              <i class="bi bi-cone-striped"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Active Projects</div>
+              <div class="stat-value" id="statProjects">—</div>
+              <div class="stat-sub">Ongoing construction</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple"><i class="bi bi-house-gear"></i></div>
+            <div class="stat-content">
+              <div class="stat-label">House Models</div>
+              <div class="stat-value" id="statModels">—</div>
+              <div class="stat-sub">Available in marketplace</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Two col layout -->
+        <div class="grid-2" style="gap: 20px">
+          <!-- Recent Inquiries -->
+          <div class="bf-card">
+            <div class="bf-card-header">
+              <div class="bf-card-title">
+                <i class="bi bi-envelope" style="color: var(--primary)"></i>
+                Recent Inquiries
+              </div>
+              <button
+                class="btn-bf btn-ghost-bf btn-sm-bf"
+                onclick="
+                  showAdminTab(
+                    'inquiries',
+                    document.querySelector('[onclick*=inquiries]'),
+                  )
+                "
+              >
+                View All
+              </button>
+            </div>
+            <div id="overviewInquiriesBody">
+              <div class="empty-state">
+                <span class="spinner-bf dark"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Projects -->
+          <div class="bf-card">
+            <div class="bf-card-header">
+              <div class="bf-card-title">
+                <i class="bi bi-cone-striped" style="color: var(--accent)"></i>
+                Active Projects
+              </div>
+              <button
+                class="btn-bf btn-ghost-bf btn-sm-bf"
+                onclick="
+                  showAdminTab(
+                    'projects',
+                    document.querySelector('[onclick*=projects]'),
+                  )
+                "
+              >
+                View All
+              </button>
+            </div>
+            <div id="overviewProjectsBody">
+              <div class="empty-state">
+                <span class="spinner-bf dark"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ADD MODEL TAB ── -->
+    <div id="tab-models" class="tab-content">
+      <div class="admin-tab-body">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Add New Model</div>
+            <div class="page-subtitle">
+              Upload a new 3D house model to the marketplace
+            </div>
+          </div>
+        </div>
+        <div style="max-width: 800px">
+          <div class="bf-card">
+            <div class="bf-card-header">
+              <div class="bf-card-title">
+                <i class="bi bi-house-add" style="color: var(--primary)"></i>
+                New 3D House Model
+              </div>
+            </div>
+            <div class="bf-card-body">
+              <div id="addModelAlert"></div>
               <form id="addModelForm">
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold text-muted small"
-                      >Model Name</label
+                <div class="grid-2" style="gap: 16px">
+                  <div class="bf-form-group">
+                    <label class="bf-label"
+                      >Model Name
+                      <span style="color: var(--danger)">*</span></label
                     >
                     <input
                       type="text"
                       id="modelName"
-                      class="form-control"
-                      required
+                      class="bf-input"
                       placeholder="e.g. Modern Luxury Villa"
+                      required
                     />
                   </div>
-                  <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold text-muted small"
-                      >Image Cover Path (.jpg/.png)</label
+                  <div class="bf-form-group">
+                    <label class="bf-label"
+                      >Cover Image Path (.jpg/.png)
+                      <span style="color: var(--danger)">*</span></label
                     >
                     <input
                       type="text"
                       id="imgUrl"
-                      class="form-control"
+                      class="bf-input"
+                      placeholder="assets/images/cover.jpg"
                       required
-                      placeholder="e.g. assets/images/cover.jpg"
                     />
                   </div>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label fw-semibold text-muted small"
-                    >Description</label
+                <div class="bf-form-group">
+                  <label class="bf-label"
+                    >Description
+                    <span style="color: var(--danger)">*</span></label
                   >
                   <textarea
                     id="description"
-                    class="form-control"
+                    class="bf-input bf-textarea"
                     rows="3"
+                    placeholder="Describe the design style, features, and highlights..."
                     required
-                    placeholder="Brief description about the house design and features..."
                   ></textarea>
                 </div>
-                <div class="row bg-light p-3 rounded mb-3 mx-0 border">
-                  <div class="col-md-4 mb-2 mb-md-0">
-                    <label class="form-label fw-semibold text-muted small"
-                      >Estimated Cost (Rs.)</label
-                    >
-                    <div class="input-group">
-                      <span class="input-group-text bg-white">Rs.</span>
-                      <input
-                        type="number"
-                        id="estimatedCost"
-                        class="form-control"
-                        required
-                        placeholder="8500000"
-                      />
-                    </div>
+                <div
+                  style="
+                    background: var(--surface-2);
+                    border: 1px solid var(--border);
+                    border-radius: var(--radius-sm);
+                    padding: 18px;
+                    margin-bottom: 16px;
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 0.78rem;
+                      font-weight: 700;
+                      text-transform: uppercase;
+                      letter-spacing: 0.7px;
+                      color: var(--text-muted);
+                      margin-bottom: 14px;
+                    "
+                  >
+                    Property Specifications
                   </div>
-                  <div class="col-md-4 mb-2 mb-md-0">
-                    <label class="form-label fw-semibold text-muted small"
-                      >Floor Area (sq.ft)</label
-                    >
-                    <div class="input-group">
-                      <input
-                        type="number"
-                        id="floorArea"
-                        class="form-control"
-                        required
-                        placeholder="1500"
-                      />
-                      <span class="input-group-text bg-white">sq.ft</span>
+                  <div class="grid-3" style="gap: 14px">
+                    <div class="bf-form-group" style="margin-bottom: 0">
+                      <label class="bf-label"
+                        >Estimated Cost (Rs.)
+                        <span style="color: var(--danger)">*</span></label
+                      >
+                      <div class="input-group-bf">
+                        <span class="input-prefix">Rs.</span>
+                        <input
+                          type="number"
+                          id="estimatedCost"
+                          class="bf-input"
+                          placeholder="8500000"
+                          required
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label fw-semibold text-muted small"
-                      >Bedrooms</label
-                    >
-                    <div class="input-group">
-                      <span class="input-group-text bg-white"
-                        ><i class="bi bi-door-open"></i
-                      ></span>
+                    <div class="bf-form-group" style="margin-bottom: 0">
+                      <label class="bf-label"
+                        >Floor Area (sq.ft)
+                        <span style="color: var(--danger)">*</span></label
+                      >
+                      <div class="input-group-bf">
+                        <input
+                          type="number"
+                          id="floorArea"
+                          class="bf-input"
+                          placeholder="1500"
+                          required
+                          style="
+                            border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+                          "
+                        />
+                        <span
+                          class="input-prefix"
+                          style="
+                            border-left: none;
+                            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+                            border-left: none;
+                          "
+                          >sq.ft</span
+                        >
+                      </div>
+                    </div>
+                    <div class="bf-form-group" style="margin-bottom: 0">
+                      <label class="bf-label"
+                        >Bedrooms
+                        <span style="color: var(--danger)">*</span></label
+                      >
                       <input
                         type="number"
                         id="numBedrooms"
-                        class="form-control"
-                        required
+                        class="bf-input"
                         placeholder="3"
+                        min="1"
+                        max="10"
+                        required
                       />
                     </div>
                   </div>
                 </div>
-                <div class="mb-4">
-                  <label class="form-label fw-semibold text-muted small"
-                    >3D Model File Path (.glb)</label
+                <div class="bf-form-group">
+                  <label class="bf-label"
+                    >3D Model File Path (.glb)
+                    <span style="color: var(--danger)">*</span></label
                   >
                   <input
                     type="text"
                     id="modelUrl"
-                    class="form-control"
+                    class="bf-input"
+                    placeholder="assets/models/my_house.glb"
                     required
-                    placeholder="e.g. assets/models/my_house.glb"
                   />
-                  <div class="form-text text-secondary">
-                    <i class="bi bi-info-circle me-1"></i>Ensure the file is
-                    uploaded to the assets/models folder before saving.
+                  <div
+                    style="
+                      font-size: 0.78rem;
+                      color: var(--text-muted);
+                      margin-top: 6px;
+                    "
+                  >
+                    <i class="bi bi-info-circle me-1"></i>Ensure the .glb file
+                    is uploaded to the assets/models folder before saving.
                   </div>
                 </div>
                 <button
                   type="submit"
-                  class="btn btn-primary w-100 fw-bold py-2 shadow-sm"
+                  class="btn-bf btn-primary-bf"
+                  style="width: 100%; justify-content: center; padding: 12px"
                   id="saveModelBtn"
                 >
-                  <i class="bi bi-cloud-arrow-up me-2"></i>Save Model to
-                  Database
+                  <i class="bi bi-cloud-arrow-up"></i> Save Model to Marketplace
                 </button>
               </form>
             </div>
           </div>
         </div>
-
-        <div class="col-lg-10">
-          <div class="card shadow-sm border-0">
-            <div
-              class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center"
-            >
-              <h5 class="mb-0 fw-bold">
-                <i class="bi bi-envelope-paper me-2"></i>Customer Inquiries &
-                Requests
-              </h5>
-              <button
-                class="btn btn-sm btn-outline-light"
-                onclick="loadInquiries()"
-              >
-                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
-              </button>
-            </div>
-            <div class="card-body p-0">
-              <div
-                class="table-responsive"
-                style="max-height: 500px; overflow-y: auto"
-              >
-                <table
-                  class="table table-hover table-borderless table-striped mb-0 align-middle"
-                >
-                  <thead class="table-light sticky-top">
-                    <tr>
-                      <th class="ps-4">Date</th>
-                      <th>Customer Info</th>
-                      <th>Requested Model</th>
-                      <th>Message</th>
-                      <th class="pe-4 text-center">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="inquiriesTableBody">
-                    <tr>
-                      <td colspan="5" class="text-center py-5 text-muted">
-                        <div
-                          class="spinner-border spinner-border-sm text-primary me-2"
-                          role="status"
-                        ></div>
-                        Loading inquiries...
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
-    <div class="col-lg-10 mt-5">
-      <div class="card shadow-sm border-0">
-        <div
-          class="card-header bg-warning text-dark py-3 d-flex justify-content-between align-items-center"
-        >
-          <h5 class="mb-0 fw-bold">
-            <i class="bi bi-cone-striped me-2"></i>Ongoing Construction Projects
-          </h5>
-          <button class="btn btn-sm btn-dark" onclick="loadProjects()">
-            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+    <!-- ── INQUIRIES TAB ── -->
+    <div id="tab-inquiries" class="tab-content">
+      <div class="admin-tab-body">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Customer Inquiries</div>
+            <div class="page-subtitle">
+              Review and respond to customer requests
+            </div>
+          </div>
+          <button
+            class="btn-bf btn-ghost-bf btn-sm-bf"
+            onclick="loadInquiries()"
+          >
+            <i class="bi bi-arrow-clockwise"></i> Refresh
           </button>
         </div>
-        <div class="card-body p-0">
-          <div
-            class="table-responsive"
-            style="max-height: 400px; overflow-y: auto"
-          >
-            <table
-              class="table table-hover table-borderless table-striped mb-0 align-middle"
-            >
-              <thead class="table-light sticky-top">
-                <tr>
-                  <th class="ps-4">Project ID</th>
-                  <th>Customer</th>
-                  <th>Model/Plan</th>
-                  <th>Progress</th>
-                  <th class="pe-4 text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody id="projectsTableBody">
-                <tr>
-                  <td colspan="5" class="text-center py-5 text-muted">
-                    <div
-                      class="spinner-border spinner-border-sm text-warning me-2"
-                      role="status"
-                    ></div>
-                    Loading projects...
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <div class="table-wrap">
+          <table class="bf-table">
+            <thead>
+              <tr>
+                <th style="padding-left: 20px">Date</th>
+                <th>Customer</th>
+                <th>Model</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th style="text-align: center; padding-right: 20px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inquiriesTableBody">
+              <tr>
+                <td
+                  colspan="6"
+                  style="
+                    text-align: center;
+                    padding: 48px;
+                    color: var(--text-muted);
+                  "
+                >
+                  <span class="spinner-bf dark"></span
+                  ><span style="margin-left: 10px">Loading inquiries...</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <div class="modal fade" id="replyModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content border-0 shadow">
-          <div class="modal-header bg-primary text-white">
-            <h5 class="modal-title fw-bold">
-              <i class="bi bi-reply-fill me-2"></i>Reply to Customer
-            </h5>
-            <button
-              type="button"
-              class="btn-close btn-close-white"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
+    <!-- ── PROJECTS TAB ── -->
+    <div id="tab-projects" class="tab-content">
+      <div class="admin-tab-body">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Construction Projects</div>
+            <div class="page-subtitle">
+              Monitor and update all ongoing projects
+            </div>
           </div>
-          <div class="modal-body p-4">
-            <div id="replyAlertMessage"></div>
-            <form id="replyForm">
-              <div class="mb-3">
-                <label class="form-label fw-bold small text-muted">To:</label>
+          <button
+            class="btn-bf btn-ghost-bf btn-sm-bf"
+            onclick="loadProjects()"
+          >
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table class="bf-table">
+            <thead>
+              <tr>
+                <th style="padding-left: 20px">Project ID</th>
+                <th>Customer</th>
+                <th>Model / Plan</th>
+                <th>Progress</th>
+                <th>Status</th>
+                <th style="text-align: center; padding-right: 20px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="projectsTableBody">
+              <tr>
+                <td
+                  colspan="6"
+                  style="
+                    text-align: center;
+                    padding: 48px;
+                    color: var(--text-muted);
+                  "
+                >
+                  <span class="spinner-bf dark"></span
+                  ><span style="margin-left: 10px">Loading projects...</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MODALS ═══ -->
+
+    <!-- Reply Modal -->
+    <div
+      id="replyModalWrap"
+      style="display: none"
+      class="bf-modal-backdrop"
+      onclick="closeMod(event, 'replyModalWrap')"
+    >
+      <div class="bf-modal" onclick="event.stopPropagation()">
+        <div class="bf-modal-header">
+          <div class="bf-modal-title">
+            <i
+              class="bi bi-reply-fill"
+              style="color: var(--primary); margin-right: 8px"
+            ></i
+            >Reply to Customer
+          </div>
+          <button class="bf-modal-close" onclick="closeMod2('replyModalWrap')">
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+        <div class="bf-modal-body">
+          <div id="replyAlert"></div>
+          <form id="replyForm">
+            <div class="bf-form-group">
+              <label class="bf-label">To</label>
+              <input type="email" id="replyEmail" class="bf-input" readonly />
+            </div>
+            <div class="bf-form-group">
+              <label class="bf-label">Subject</label>
+              <input type="text" id="replySubject" class="bf-input" required />
+            </div>
+            <div class="bf-form-group">
+              <label class="bf-label">Message</label>
+              <textarea
+                id="replyMessage"
+                class="bf-input bf-textarea"
+                rows="6"
+                required
+                placeholder="Type your professional reply..."
+              ></textarea>
+            </div>
+            <button
+              type="submit"
+              class="btn-bf btn-primary-bf"
+              style="width: 100%; justify-content: center"
+              id="sendReplyBtn"
+            >
+              <i class="bi bi-send-fill"></i> Send Email
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Approve Modal -->
+    <div
+      id="approveModalWrap"
+      style="display: none"
+      class="bf-modal-backdrop"
+      onclick="closeMod(event, 'approveModalWrap')"
+    >
+      <div class="bf-modal" onclick="event.stopPropagation()">
+        <div class="bf-modal-header">
+          <div class="bf-modal-title">
+            <i
+              class="bi bi-check-circle-fill"
+              style="color: var(--success); margin-right: 8px"
+            ></i
+            >Approve Custom Request
+          </div>
+          <button
+            class="bf-modal-close"
+            onclick="closeMod2('approveModalWrap')"
+          >
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+        <div class="bf-modal-body">
+          <div class="bf-alert bf-alert-info">
+            <i class="bi bi-info-circle-fill"></i> Approving will create a
+            custom order and email the customer with the quote.
+          </div>
+          <div id="approveAlert"></div>
+          <form id="approveForm">
+            <input type="hidden" id="approveInquiryId" />
+            <div class="grid-2" style="gap: 14px">
+              <div class="bf-form-group">
+                <label class="bf-label">Customer Name</label>
                 <input
-                  type="email"
-                  id="replyEmail"
-                  class="form-control bg-light"
+                  type="text"
+                  id="approveCustomerName"
+                  class="bf-input"
                   readonly
                 />
               </div>
-              <div class="mb-3">
-                <label class="form-label fw-bold small text-muted"
-                  >Subject:</label
-                >
+              <div class="bf-form-group">
+                <label class="bf-label">Requested Model</label>
                 <input
                   type="text"
-                  id="replySubject"
-                  class="form-control"
-                  required
+                  id="approveModelName"
+                  class="bf-input"
+                  readonly
                 />
               </div>
-              <div class="mb-4">
-                <label class="form-label fw-bold small text-muted"
-                  >Message:</label
-                >
-                <textarea
-                  id="replyMessage"
-                  class="form-control"
-                  rows="6"
-                  required
-                  placeholder="Type your professional reply here..."
-                ></textarea>
-              </div>
-              <button
-                type="submit"
-                class="btn btn-primary w-100 fw-bold py-2 shadow-sm"
-                id="sendReplyBtn"
+            </div>
+            <div class="bf-form-group">
+              <label class="bf-label"
+                >Approved Specifications
+                <span style="color: var(--danger)">*</span></label
               >
-                <i class="bi bi-send-fill me-2"></i>Send Email
-              </button>
-            </form>
-          </div>
+              <textarea
+                id="approveSpecs"
+                class="bf-input bf-textarea"
+                rows="3"
+                required
+                placeholder="e.g. Added extra bathroom, expanded kitchen area..."
+              ></textarea>
+            </div>
+            <div class="bf-form-group">
+              <label class="bf-label"
+                >Final Estimated Cost (Rs.)
+                <span style="color: var(--danger)">*</span></label
+              >
+              <div class="input-group-bf">
+                <span class="input-prefix">Rs.</span>
+                <input
+                  type="number"
+                  id="approvePrice"
+                  class="bf-input"
+                  required
+                  placeholder="9500000"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              class="btn-bf btn-success-bf"
+              style="width: 100%; justify-content: center"
+              id="confirmApproveBtn"
+            >
+              <i class="bi bi-file-earmark-check-fill"></i> Confirm & Create
+              Order
+            </button>
+          </form>
         </div>
       </div>
     </div>
 
-    <div class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content border-0 shadow-lg">
-          <div class="modal-header bg-success bg-gradient text-white border-0">
-            <h5 class="modal-title fw-bold">
-              <i class="bi bi-check-circle-fill me-2"></i>Approve Custom Request
-            </h5>
-            <button
-              type="button"
-              class="btn-close btn-close-white"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
+    <!-- Progress Modal -->
+    <div
+      id="progressModalWrap"
+      style="display: none"
+      class="bf-modal-backdrop"
+      onclick="closeMod(event, 'progressModalWrap')"
+    >
+      <div class="bf-modal" onclick="event.stopPropagation()">
+        <div class="bf-modal-header">
+          <div class="bf-modal-title">
+            <i
+              class="bi bi-hammer"
+              style="color: var(--accent); margin-right: 8px"
+            ></i
+            >Update Project Progress
           </div>
-          <div class="modal-body p-4 bg-light">
-            <div id="approveAlertMessage"></div>
-            <div class="alert alert-info border-0 shadow-sm small mb-4">
-              <i class="bi bi-info-circle-fill me-2"></i>Approving this request
-              will create a new Custom Order and send a confirmation email to
-              the customer.
+          <button
+            class="bf-modal-close"
+            onclick="closeMod2('progressModalWrap')"
+          >
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+        <div class="bf-modal-body">
+          <div id="progressAlert"></div>
+          <form id="progressForm">
+            <input type="hidden" id="updateProjectId" />
+            <div class="bf-form-group">
+              <label class="bf-label">Selected Project</label>
+              <input
+                type="text"
+                id="updateProjectName"
+                class="bf-input"
+                readonly
+              />
             </div>
-            <form id="approveForm">
-              <input type="hidden" id="approveInquiryId" />
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <label class="form-label fw-bold small text-muted"
-                    >Customer Name</label
-                  >
-                  <input
-                    type="text"
-                    id="approveCustomerName"
-                    class="form-control bg-white"
-                    readonly
-                  />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label fw-bold small text-muted"
-                    >Requested Model</label
-                  >
-                  <input
-                    type="text"
-                    id="approveModelName"
-                    class="form-control bg-white"
-                    readonly
-                  />
-                </div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label fw-bold small text-dark"
-                  >Approved Custom Specifications
-                  <span class="text-danger">*</span></label
+            <div class="bf-form-group">
+              <label class="bf-label"
+                >Update Description
+                <span style="color: var(--danger)">*</span></label
+              >
+              <textarea
+                id="updateMessage"
+                class="bf-input bf-textarea"
+                rows="3"
+                required
+                placeholder="e.g. Foundation work completed successfully."
+              ></textarea>
+            </div>
+            <div class="grid-2" style="gap: 14px">
+              <div class="bf-form-group">
+                <label class="bf-label"
+                  >Overall Completion (%)
+                  <span style="color: var(--danger)">*</span></label
                 >
-                <textarea
-                  id="approveSpecs"
-                  class="form-control border-secondary-subtle"
-                  rows="3"
-                  required
-                  placeholder="E.g., Added an extra bathroom and expanded the kitchen area..."
-                ></textarea>
-              </div>
-              <div class="mb-4">
-                <label class="form-label fw-bold small text-dark"
-                  >Final Estimated Cost (Rs.)
-                  <span class="text-danger">*</span></label
-                >
-                <div class="input-group">
-                  <span
-                    class="input-group-text bg-white border-secondary-subtle"
-                    >Rs.</span
-                  >
+                <div class="input-group-bf">
                   <input
                     type="number"
-                    id="approvePrice"
-                    class="form-control border-secondary-subtle"
+                    id="updatePercentage"
+                    class="bf-input"
                     required
-                    placeholder="e.g. 9500000"
+                    min="1"
+                    max="100"
+                    placeholder="25"
+                    style="border-radius: var(--radius-sm) 0 0 var(--radius-sm)"
+                    oninput="previewProgress(this.value)"
                   />
+                  <span
+                    class="input-prefix"
+                    style="
+                      border-left: none;
+                      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+                    "
+                    >%</span
+                  >
+                </div>
+                <div
+                  class="bf-progress-wrap"
+                  style="margin-top: 8px; height: 6px"
+                >
+                  <div
+                    class="bf-progress-bar"
+                    id="progressPreview"
+                    style="width: 0%"
+                  ></div>
                 </div>
               </div>
-              <button
-                type="submit"
-                class="btn btn-success w-100 fw-bold py-2 shadow-sm"
-                id="confirmApproveBtn"
-              >
-                <i class="bi bi-file-earmark-check-fill me-2"></i>Confirm &
-                Create Order
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal fade" id="progressModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content border-0 shadow-lg">
-          <div class="modal-header bg-warning text-dark border-0">
-            <h5 class="modal-title fw-bold">
-              <i class="bi bi-hammer me-2"></i>Update Project Progress
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body p-4 bg-light">
-            <div id="progressAlertMessage"></div>
-            <form id="progressForm">
-              <input type="hidden" id="updateProjectId" />
-
-              <div class="mb-3">
-                <label class="form-label fw-bold small text-muted"
-                  >Selected Project</label
-                >
+              <div class="bf-form-group">
+                <label class="bf-label">Photo URL (Optional)</label>
                 <input
                   type="text"
-                  id="updateProjectName"
-                  class="form-control bg-white fw-bold text-primary"
-                  readonly
+                  id="updateImageUrl"
+                  class="bf-input"
+                  placeholder="assets/images/progress.jpg"
                 />
               </div>
-
-              <div class="mb-3">
-                <label class="form-label fw-bold small text-dark"
-                  >Update Description <span class="text-danger">*</span></label
-                >
-                <textarea
-                  id="updateMessage"
-                  class="form-control border-secondary-subtle"
-                  rows="3"
-                  required
-                  placeholder="E.g., Foundation work completed successfully."
-                ></textarea>
-              </div>
-
-              <div class="row mb-4">
-                <div class="col-md-6">
-                  <label class="form-label fw-bold small text-dark"
-                    >Overall Completion (%)
-                    <span class="text-danger">*</span></label
-                  >
-                  <div class="input-group">
-                    <input
-                      type="number"
-                      id="updatePercentage"
-                      class="form-control border-secondary-subtle"
-                      required
-                      min="1"
-                      max="100"
-                      placeholder="e.g. 25"
-                    />
-                    <span
-                      class="input-group-text bg-white border-secondary-subtle"
-                      >%</span
-                    >
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label fw-bold small text-dark"
-                    >Image URL (Optional)</label
-                  >
-                  <input
-                    type="text"
-                    id="updateImageUrl"
-                    class="form-control border-secondary-subtle"
-                    placeholder="assets/images/progress1.jpg"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                class="btn btn-warning w-100 fw-bold py-2 shadow-sm"
-                id="saveProgressBtn"
-              >
-                <i class="bi bi-cloud-upload-fill me-2"></i>Save Progress Update
-              </button>
-            </form>
-          </div>
+            </div>
+            <button
+              type="submit"
+              class="btn-bf btn-accent-bf"
+              style="width: 100%; justify-content: center"
+              id="saveProgressBtn"
+            >
+              <i class="bi bi-cloud-upload-fill"></i> Save Progress Update
+            </button>
+          </form>
         </div>
       </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/admin.js"></script>
   </body>
 </html>

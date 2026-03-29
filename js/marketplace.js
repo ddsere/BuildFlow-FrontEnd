@@ -1,137 +1,124 @@
+// marketplace.js — BuildFlow
 document.addEventListener("DOMContentLoaded", () => {
   updateAuthUI();
   fetchModels();
 });
 
-// --- Authentication Functions ---
 function updateAuthUI() {
   const token = localStorage.getItem("authToken");
-  const loginBtn = document.getElementById("loginBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
+  const loginBtn = document.getElementById("loginNavBtn");
+  const registerBtn = document.getElementById("registerNavBtn");
+  const guestBanner = document.getElementById("guestBanner");
 
   if (token) {
-    if (loginBtn) loginBtn.classList.add("d-none");
-    if (logoutBtn) logoutBtn.classList.remove("d-none");
-  } else {
-    if (loginBtn) loginBtn.classList.remove("d-none");
-    if (logoutBtn) logoutBtn.classList.add("d-none");
+    if (loginBtn) loginBtn.textContent = "Dashboard";
+    if (loginBtn) loginBtn.href = "client-dashboard.html";
+    if (registerBtn) {
+      registerBtn.textContent = "Logout";
+      registerBtn.href = "#";
+      registerBtn.onclick = logout;
+    }
+    if (guestBanner) guestBanner.style.display = "none";
   }
 }
-
-document.getElementById("loginForm")?.addEventListener("submit", function (e) {
-  e.preventDefault();
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
-
-  fetch("http://localhost:8080/api/v1/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  })
-    .then((res) => res.json())
-    .then((result) => {
-      const token = result.data?.token || result.token || result.jwt;
-      const userEmail = result.data?.email || result.email || email;
-
-      if (token) {
-        localStorage.setItem("authToken", token);
-        localStorage.setItem("userEmail", userEmail);
-        location.reload();
-      } else {
-        document.getElementById("loginAlert").innerHTML =
-          `<div class="alert alert-danger small">Invalid Email or Password!</div>`;
-      }
-    })
-    .catch((err) => {
-      console.error("Login Error:", err);
-      document.getElementById("loginAlert").innerHTML =
-        `<div class="alert alert-danger small">System Error. Please try again.</div>`;
-    });
-});
 
 function logout() {
   localStorage.clear();
   location.reload();
 }
 
-function showLoginAlert() {
-  alert("Please login to proceed!");
-  const loginModal = new bootstrap.Modal(document.getElementById("loginModal"));
-  loginModal.show();
-}
-
-// --- Data Fetching & Display ---
 function fetchModels() {
-  const apiUrl = "http://localhost:8080/api/v1/models";
-  fetch(apiUrl)
-    .then((response) => response.json())
+  fetch("http://localhost:8080/api/v1/models")
+    .then((r) => r.json())
     .then((result) => {
-      if (result.status === 200) {
-        displayModels(result.data);
-      }
+      if (result.status === 200) displayModels(result.data);
     })
-    .catch((error) => {
-      console.error("Connection Error:", error);
+    .catch(() => {
       document.getElementById("models-container").innerHTML =
-        `<div class="alert alert-danger text-center w-100">Failed to load models. Check backend.</div>`;
+        '<div style="grid-column:1/-1;text-align:center;padding:60px 0;color:var(--danger);">' +
+        '<i class="bi bi-wifi-off" style="font-size:2.5rem;display:block;margin-bottom:12px;opacity:0.5;"></i>' +
+        '<p style="font-size:0.9rem;">Could not connect to server. Please ensure the backend is running.</p></div>';
     });
 }
 
 function displayModels(models) {
   const container = document.getElementById("models-container");
+  const countEl = document.getElementById("modelCount");
   container.innerHTML = "";
-  const isLoggedIn = localStorage.getItem("authToken") !== null;
 
-  if (models.length === 0) {
-    container.innerHTML = `<p class="text-center w-100">No 3D models available.</p>`;
+  if (countEl)
+    countEl.textContent =
+      models.length + " model" + (models.length !== 1 ? "s" : "") + " found";
+
+  const isLoggedIn = !!localStorage.getItem("authToken");
+
+  if (!models.length) {
+    container.innerHTML =
+      '<div style="grid-column:1/-1;" class="empty-state"><i class="bi bi-search"></i><p>No models match your search. Try adjusting the filters.</p></div>';
     return;
   }
 
   models.forEach((model) => {
-    const formattedPrice = model.estimatedCost
+    const cost = model.estimatedCost
       ? model.estimatedCost.toLocaleString()
       : "N/A";
+    const advance = model.estimatedCost
+      ? (model.estimatedCost * 0.05).toLocaleString(undefined, {
+          maximumFractionDigits: 0,
+        })
+      : "N/A";
 
-    // Aluth Inquiry Button eka methanata damma
-    const actionButtons = isLoggedIn
+    const actions = isLoggedIn
       ? `
-          <button class="btn btn-dark w-100 mt-3 fw-semibold" onclick="downloadQuotation('${model.modelId}', event)">Download Quotation (PDF)</button>
-          <button class="btn btn-outline-success w-100 mt-2 fw-bold" onclick="openPurchaseModal('${model.modelName}', ${model.estimatedCost * 0.05})">Buy Plan (Advance 5%)</button>
-          <button class="btn btn-outline-primary w-100 mt-2 fw-bold" onclick="openInquiryModal('${model.modelName}')">Send Inquiry</button>
-        `
+      <button class="btn-bf btn-ghost-bf btn-sm-bf" onclick="downloadQuotation('${model.modelId}', event)" style="width:100%;justify-content:center;">
+        <i class="bi bi-file-earmark-pdf"></i> Download Quotation
+      </button>
+      <button class="btn-bf btn-success-bf btn-sm-bf" onclick="openPurchaseModal('${model.modelName}', ${model.estimatedCost * 0.05})" style="width:100%;justify-content:center;">
+        <i class="bi bi-cart-check"></i> Buy Plan (5% Advance)
+      </button>
+      <button class="btn-bf btn-outline-bf btn-sm-bf" onclick="openInquiryModal('${model.modelName}')" style="width:100%;justify-content:center;">
+        <i class="bi bi-chat-dots"></i> Send Inquiry
+      </button>
+    `
       : `
-          <button class="btn btn-secondary w-100 mt-3 fw-semibold" onclick="showLoginAlert()">Login to Request</button>
-          <button class="btn btn-secondary w-100 mt-2 fw-bold" onclick="showLoginAlert()">Login to Buy Plan</button>
-          <button class="btn btn-secondary w-100 mt-2 fw-bold" onclick="showLoginAlert()">Login to Inquire</button>
-        `;
+      <a href="login.html" class="btn-bf btn-ghost-bf btn-sm-bf" style="width:100%;justify-content:center;">
+        <i class="bi bi-lock"></i> Login to Download Quotation
+      </a>
+      <a href="login.html" class="btn-bf btn-outline-bf btn-sm-bf" style="width:100%;justify-content:center;">
+        <i class="bi bi-person-circle"></i> Login to Purchase / Inquire
+      </a>
+    `;
 
-    const cardHtml = `
-      <div class="col-md-4 mb-4">
-        <div class="card h-100 shadow-sm border-0">
-          <div class="card-img-top bg-secondary bg-opacity-10 rounded-top d-flex justify-content-center align-items-center" style="height: 300px; position: relative;">
-            <model-viewer src="${model.modelUrl}" alt="${model.modelName}" auto-rotate camera-controls style="width: 100%; height: 100%;"></model-viewer>
-            <span class="badge bg-primary position-absolute top-0 end-0 m-2">3D View</span>
-          </div>
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title fw-bold text-dark">${model.modelName}</h5>
-            <p class="card-text text-muted small">${model.description}</p>
-            <div class="mt-auto bg-light p-3 rounded">
-              <div class="d-flex justify-content-between mb-2">
-                <span class="fw-semibold">Estimated Cost:</span>
-                <span class="text-success fw-bold">Rs. ${formattedPrice}</span>
-              </div>
-              <div class="d-flex justify-content-between mb-2">
-                <span>Bedrooms:</span> <span>${model.numBedrooms}</span>
-              </div>
-              <div class="d-flex justify-content-between">
-                <span>Area:</span> <span>${model.floorArea} sq.ft</span>
-              </div>
+    container.innerHTML += `
+      <div class="model-card anim-fade-up">
+        <div class="model-viewer-wrap">
+          <model-viewer src="${model.modelUrl}" alt="${model.modelName}" auto-rotate camera-controls style="width:100%;height:100%;"></model-viewer>
+          <span class="model-badge"><i class="bi bi-box" style="margin-right:4px;"></i>3D View</span>
+        </div>
+        <div class="model-card-body">
+          <div class="model-card-title">${model.modelName}</div>
+          <p class="model-card-desc">${model.description || "A beautifully designed architectural model."}</p>
+          <div class="model-specs">
+            <div class="model-spec-row">
+              <span class="model-spec-label"><i class="bi bi-currency-rupee"></i> Estimated Cost</span>
+              <span class="model-spec-value price">Rs. ${cost}</span>
             </div>
-            ${actionButtons}
+            <div class="model-spec-row">
+              <span class="model-spec-label"><i class="bi bi-door-open"></i> Bedrooms</span>
+              <span class="model-spec-value">${model.numBedrooms}</span>
+            </div>
+            <div class="model-spec-row">
+              <span class="model-spec-label"><i class="bi bi-aspect-ratio"></i> Floor Area</span>
+              <span class="model-spec-value">${model.floorArea} sq.ft</span>
+            </div>
+            <div class="model-spec-row">
+              <span class="model-spec-label"><i class="bi bi-cash-coin"></i> 5% Advance</span>
+              <span class="model-spec-value" style="color:var(--accent);">Rs. ${advance}</span>
+            </div>
           </div>
+          <div class="model-actions">${actions}</div>
         </div>
       </div>`;
-    container.innerHTML += cardHtml;
   });
 }
 
@@ -146,39 +133,65 @@ function unifiedSearch() {
   if (bedrooms) url.searchParams.append("minBedrooms", bedrooms);
 
   fetch(url)
-    .then((res) => res.json())
+    .then((r) => r.json())
     .then((result) => {
       if (result.status === 200) displayModels(result.data);
     });
 }
 
-// --- Modals ---
+function clearFilters() {
+  document.getElementById("nameSearch").value = "";
+  document.getElementById("priceSearch").value = "";
+  document.getElementById("bedroomSearch").value = "";
+  fetchModels();
+}
+
+// ── Modals ──
+function openModal(id) {
+  document.getElementById(id).style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+function closeModal(id) {
+  document.getElementById(id).style.display = "none";
+  document.body.style.overflow = "";
+}
+function closeModalOnBackdrop(event, id) {
+  if (event.target.id === id) closeModal(id);
+}
+
 function openPurchaseModal(modelName, advanceAmount) {
-  document.getElementById("purchaseModelName").innerText = modelName;
-  document.getElementById("purchasePrice").innerText =
-    advanceAmount.toLocaleString();
+  document.getElementById("purchaseModelName").textContent = modelName;
+  document.getElementById("purchasePrice").textContent =
+    advanceAmount.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  document.getElementById("payBtnAmt").textContent =
+    advanceAmount.toLocaleString(undefined, { maximumFractionDigits: 0 });
   document.getElementById("hiddenModelName").value = modelName;
   document.getElementById("hiddenPrice").value = advanceAmount;
-  new bootstrap.Modal(document.getElementById("purchaseModal")).show();
+  document.getElementById("purchaseAlert").innerHTML = "";
+  openModal("purchaseModalWrap");
 }
 
 function openInquiryModal(modelName) {
   document.getElementById("inquiryModelName").value = modelName;
-
-  // LocalStorage eken email eka aran auto fill karanawa
   const savedEmail = localStorage.getItem("userEmail");
-  if (savedEmail) {
+  if (savedEmail)
     document.getElementById("inquiryCustomerEmail").value = savedEmail;
-  }
-
-  new bootstrap.Modal(document.getElementById("inquiryModal")).show();
+  document.getElementById("inquiryAlert").innerHTML = "";
+  openModal("inquiryModalWrap");
 }
 
-// --- Form Submissions ---
+function formatCard(input) {
+  let v = input.value.replace(/\D/g, "").substring(0, 16);
+  input.value = v.replace(/(.{4})/g, "$1 ").trim();
+}
+
+// ── Form Submissions ──
 document
   .getElementById("purchaseForm")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
+  .addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const btn = document.getElementById("confirmPurchaseBtn");
+    const alertBox = document.getElementById("purchaseAlert");
     const token = localStorage.getItem("authToken");
 
     const orderData = {
@@ -188,36 +201,48 @@ document
       amountPaid: parseFloat(document.getElementById("hiddenPrice").value),
     };
 
-    fetch("http://localhost:8080/api/v1/orders/purchase", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-      body: JSON.stringify(orderData),
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        document.getElementById("purchaseAlertMessage").innerHTML =
-          `<div class="alert alert-success small">Payment Successful!</div>`;
-        setTimeout(() => location.reload(), 2000);
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-bf"></span> Processing...';
+    alertBox.innerHTML = "";
+
+    try {
+      const res = await fetch("http://localhost:8080/api/v1/orders/purchase", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+        body: JSON.stringify(orderData),
       });
+      const result = await res.json();
+      if (res.ok) {
+        alertBox.innerHTML =
+          '<div class="bf-alert bf-alert-success"><i class="bi bi-check-circle-fill"></i> Payment successful! Receipt sent to your email.</div>';
+        setTimeout(() => {
+          closeModal("purchaseModalWrap");
+          this.reset();
+        }, 3000);
+      } else throw new Error(result.message || "Payment failed.");
+    } catch (err) {
+      alertBox.innerHTML = `<div class="bf-alert bf-alert-danger"><i class="bi bi-exclamation-triangle-fill"></i> ${err.message}</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML =
+        '<i class="bi bi-lock-fill"></i> Pay Securely Rs. <span id="payBtnAmt">' +
+        document.getElementById("hiddenPrice").value +
+        "</span>";
+    }
   });
 
-// Aluth Inquiry Submit Logic Eka
 document
   .getElementById("inquiryForm")
-  ?.addEventListener("submit", function (event) {
-    event.preventDefault();
+  .addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const btn = document.getElementById("sendInquiryBtn");
+    const alertBox = document.getElementById("inquiryAlert");
     const token = localStorage.getItem("authToken");
 
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.disabled = true;
-    submitBtn.innerHTML =
-      '<span class="spinner-border spinner-border-sm"></span> Sending...';
-
-    const inquiryData = {
+    const data = {
       modelName: document.getElementById("inquiryModelName").value,
       customerName: document.getElementById("inquiryCustomerName").value,
       customerEmail: document.getElementById("inquiryCustomerEmail").value,
@@ -225,84 +250,71 @@ document
       message: document.getElementById("inquiryMessage").value,
     };
 
-    fetch("http://localhost:8080/api/v1/inquiries/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-      body: JSON.stringify(inquiryData),
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        const alertBox = document.getElementById("inquiryAlertMessage");
-        if (result.status === 200) {
-          alertBox.innerHTML = `<div class="alert alert-success small"><i class="bi bi-check-circle"></i> Inquiry sent successfully! Email confirmation sent.</div>`;
-          setTimeout(() => {
-            const modalInst = bootstrap.Modal.getInstance(
-              document.getElementById("inquiryModal"),
-            );
-            modalInst.hide();
-            this.reset();
-            alertBox.innerHTML = "";
-          }, 2500);
-        } else {
-          alertBox.innerHTML = `<div class="alert alert-danger small">Failed: ${result.message}</div>`;
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        document.getElementById("inquiryAlertMessage").innerHTML =
-          `<div class="alert alert-danger small">Network error! Please try again.</div>`;
-      })
-      .finally(() => {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-bf"></span> Sending...';
+    alertBox.innerHTML = "";
+
+    try {
+      const res = await fetch("http://localhost:8080/api/v1/inquiries/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+        body: JSON.stringify(data),
       });
+      const result = await res.json();
+      if (result.status === 200) {
+        alertBox.innerHTML =
+          '<div class="bf-alert bf-alert-success"><i class="bi bi-check-circle-fill"></i> Inquiry sent! We\'ll respond to your email shortly.</div>';
+        setTimeout(() => {
+          closeModal("inquiryModalWrap");
+          this.reset();
+        }, 2500);
+      } else throw new Error(result.message || "Failed to send inquiry.");
+    } catch (err) {
+      alertBox.innerHTML = `<div class="bf-alert bf-alert-danger"><i class="bi bi-exclamation-triangle-fill"></i> ${err.message}</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-send"></i> Send Inquiry';
+    }
   });
 
 async function downloadQuotation(modelId, event) {
-  const token = localStorage.getItem("authToken");
-  if (!token) {
-    showLoginAlert();
-    return;
-  }
-
   const btn = event.target.closest("button");
-  const originalText = btn.innerHTML;
+  const orig = btn.innerHTML;
+  const token = localStorage.getItem("authToken");
+
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>...';
+  btn.innerHTML = '<span class="spinner-bf dark"></span> Generating...';
 
-  const url = `http://localhost:8080/api/v1/requests/download-quotation/${modelId}`;
-
-  fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: "Bearer " + token,
-      Accept: "application/pdf",
-    },
-  })
-    .then(async (res) => {
-      if (res.ok) {
-        const blob = await res.blob();
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = downloadUrl;
-        link.download = `Quotation_${modelId}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(downloadUrl);
-      } else {
-        alert("Failed to download PDF. Status: " + res.status);
-      }
-    })
-    .catch((err) => {
-      console.error("Fetch Error:", err);
-      alert("Server error occurred.");
-    })
-    .finally(() => {
-      btn.disabled = false;
-      btn.innerHTML = originalText;
-    });
+  try {
+    const res = await fetch(
+      `http://localhost:8080/api/v1/requests/download-quotation/${modelId}`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+          Accept: "application/pdf",
+        },
+      },
+    );
+    if (res.ok) {
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Quotation_${modelId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } else {
+      alert("Failed to generate PDF. Status: " + res.status);
+    }
+  } catch (err) {
+    alert("Server error: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
 }

@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Marketplace — BuildFlow</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <style>
+      .marketplace-header {
+        background: linear-gradient(
+          135deg,
+          var(--primary-dark),
+          var(--primary)
+        );
+        padding: 48px 0 32px;
+        color: white;
+      }
+
+      .marketplace-header h1 {
+        font-family: "Playfair Display", serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 8px;
+      }
+
+      .marketplace-header p {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 0.95rem;
+      }
+
+      .filter-bar {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 18px 0;
+        position: sticky;
+        top: var(--nav-height);
+        z-index: 100;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .filter-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .filter-row .bf-input {
+        max-width: 200px;
+      }
+      .filter-row .bf-select {
+        max-width: 160px;
+      }
+
+      .models-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+        padding: 32px 0;
+      }
+
+      .model-count {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        padding: 16px 0 0;
+      }
+
+      .container {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      /* Auth banner for guest */
+      .guest-banner {
+        background: linear-gradient(
+          135deg,
+          var(--primary-dark),
+          var(--primary)
+        );
+        color: white;
+        padding: 12px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.875rem;
+      }
+
+      .guest-banner a {
+        color: var(--accent-light);
+        font-weight: 600;
+        margin-left: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="bf-nav">
+      <div class="container">
+        <a href="index.html" class="bf-logo">
+          <div class="bf-logo-icon"><i class="bi bi-building"></i></div>
+          Build<span>Flow</span>
+        </a>
+        <ul class="bf-nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="marketplace.html" class="active">Marketplace</a></li>
+        </ul>
+        <div class="bf-nav-actions" id="navActions">
+          <a href="login.html" class="btn-bf btn-ghost-bf" id="loginNavBtn"
+            >Sign In</a
+          >
+          <a
+            href="register.html"
+            class="btn-bf btn-primary-bf"
+            id="registerNavBtn"
+            >Get Started</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <!-- Guest banner -->
+    <div class="guest-banner" id="guestBanner">
+      <span
+        ><i class="bi bi-info-circle me-1"></i> Sign in to purchase plans, send
+        inquiries, and download quotations.</span
+      >
+      <span
+        ><a href="login.html">Sign In</a> or
+        <a href="register.html">Create Account</a></span
+      >
+    </div>
+
+    <!-- Header -->
+    <div class="marketplace-header">
+      <div class="container">
+        <h1>House Model Marketplace</h1>
+        <p>
+          Explore our curated collection of 3D architectural models. Find your
+          perfect home design.
+        </p>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+      <div class="container">
+        <div class="filter-row">
+          <div
+            class="search-bar"
+            style="flex: 1; min-width: 200px; max-width: 280px"
+          >
+            <i class="bi bi-search"></i>
+            <input
+              type="text"
+              id="nameSearch"
+              class="bf-input"
+              placeholder="Search by name..."
+              oninput="unifiedSearch()"
+            />
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px">
+            <label
+              style="
+                font-size: 0.8rem;
+                font-weight: 600;
+                color: var(--text-muted);
+                white-space: nowrap;
+              "
+              >Max Price</label
+            >
+            <div class="input-group-bf" style="min-width: 160px">
+              <span class="input-prefix">Rs.</span>
+              <input
+                type="number"
+                id="priceSearch"
+                class="bf-input"
+                placeholder="Any"
+                oninput="unifiedSearch()"
+                style="
+                  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+                  max-width: 120px;
+                "
+              />
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px">
+            <label
+              style="
+                font-size: 0.8rem;
+                font-weight: 600;
+                color: var(--text-muted);
+                white-space: nowrap;
+              "
+              >Bedrooms</label
+            >
+            <select
+              id="bedroomSearch"
+              class="bf-input bf-select"
+              onchange="unifiedSearch()"
+              style="max-width: 120px"
+            >
+              <option value="">Any</option>
+              <option value="1">1+</option>
+              <option value="2">2+</option>
+              <option value="3">3+</option>
+              <option value="4">4+</option>
+            </select>
+          </div>
+          <button
+            class="btn-bf btn-ghost-bf btn-sm-bf"
+            onclick="clearFilters()"
+          >
+            <i class="bi bi-x-circle"></i> Clear
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: var(--surface-2); min-height: 60vh">
+      <div class="container">
+        <div class="model-count" id="modelCount"></div>
+        <div class="models-grid" id="models-container">
+          <div
+            style="
+              grid-column: 1/-1;
+              text-align: center;
+              padding: 60px 0;
+              color: var(--text-muted);
+            "
+          >
+            <span
+              class="spinner-bf dark"
+              style="width: 28px; height: 28px; border-width: 3px"
+            ></span>
+            <p style="margin-top: 14px; font-size: 0.9rem">
+              Loading models from database...
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inquiry Modal -->
+    <div
+      id="inquiryModalWrap"
+      style="display: none"
+      class="bf-modal-backdrop"
+      onclick="closeModalOnBackdrop(event, 'inquiryModalWrap')"
+    >
+      <div class="bf-modal" onclick="event.stopPropagation()">
+        <div class="bf-modal-header">
+          <div class="bf-modal-title">
+            <i
+              class="bi bi-chat-dots"
+              style="color: var(--primary); margin-right: 8px"
+            ></i
+            >Send Inquiry
+          </div>
+          <button
+            class="bf-modal-close"
+            onclick="closeModal('inquiryModalWrap')"
+          >
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+        <div class="bf-modal-body">
+          <p
+            style="
+              font-size: 0.85rem;
+              color: var(--text-muted);
+              margin-bottom: 20px;
+            "
+          >
+            Have questions or want custom modifications? Send us an inquiry and
+            we'll respond via email.
+          </p>
+          <div id="inquiryAlert"></div>
+          <form id="inquiryForm">
+            <div class="bf-form-group">
+              <label class="bf-label">Selected Model</label>
+              <input
+                type="text"
+                id="inquiryModelName"
+                class="bf-input"
+                readonly
+              />
+            </div>
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px"
+            >
+              <div class="bf-form-group">
+                <label class="bf-label">Your Name</label>
+                <input
+                  type="text"
+                  id="inquiryCustomerName"
+                  class="bf-input"
+                  placeholder="John Doe"
+                  required
+                />
+              </div>
+              <div class="bf-form-group">
+                <label class="bf-label">Phone Number</label>
+                <input
+                  type="tel"
+                  id="inquiryCustomerPhone"
+                  class="bf-input"
+                  placeholder="07X XXX XXXX"
+                  required
+                />
+              </div>
+            </div>
+            <div class="bf-form-group">
+              <label class="bf-label">Email Address</label>
+              <input
+                type="email"
+                id="inquiryCustomerEmail"
+                class="bf-input"
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+            <div class="bf-form-group">
+              <label class="bf-label">Your Message / Requirements</label>
+              <textarea
+                id="inquiryMessage"
+                class="bf-input bf-textarea"
+                rows="4"
+                placeholder="Describe your requirements, custom modifications, or questions..."
+                required
+              ></textarea>
+            </div>
+            <button
+              type="submit"
+              class="btn-bf btn-primary-bf"
+              style="width: 100%; justify-content: center"
+              id="sendInquiryBtn"
+            >
+              <i class="bi bi-send"></i> Send Inquiry
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Purchase Modal -->
+    <div
+      id="purchaseModalWrap"
+      style="display: none"
+      class="bf-modal-backdrop"
+      onclick="closeModalOnBackdrop(event, 'purchaseModalWrap')"
+    >
+      <div class="bf-modal" onclick="event.stopPropagation()">
+        <div class="bf-modal-header">
+          <div class="bf-modal-title">
+            <i
+              class="bi bi-credit-card"
+              style="color: var(--success); margin-right: 8px"
+            ></i
+            >Purchase Blueprint
+          </div>
+          <button
+            class="bf-modal-close"
+            onclick="closeModal('purchaseModalWrap')"
+          >
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+        <div class="bf-modal-body">
+          <div class="bf-alert bf-alert-info" style="margin-bottom: 16px">
+            <i class="bi bi-info-circle-fill"></i>
+            <div>
+              You are purchasing the full blueprint plan for
+              <strong id="purchaseModelName"></strong><br />
+              <strong
+                >Advance (5%): Rs. <span id="purchasePrice"></span
+              ></strong>
+            </div>
+          </div>
+          <input type="hidden" id="hiddenModelName" />
+          <input type="hidden" id="hiddenPrice" />
+          <div id="purchaseAlert"></div>
+          <form id="purchaseForm">
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px"
+            >
+              <div class="bf-form-group">
+                <label class="bf-label">Full Name</label>
+                <input
+                  type="text"
+                  id="buyerName"
+                  class="bf-input"
+                  placeholder="John Doe"
+                  required
+                />
+              </div>
+              <div class="bf-form-group">
+                <label class="bf-label">Email Address</label>
+                <input
+                  type="email"
+                  id="buyerEmail"
+                  class="bf-input"
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
+            </div>
+            <div class="bf-divider"></div>
+            <p
+              style="
+                font-size: 0.82rem;
+                font-weight: 700;
+                color: var(--text-secondary);
+                margin-bottom: 14px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+              "
+            >
+              Payment Details (Simulated)
+            </p>
+            <div class="bf-form-group">
+              <label class="bf-label">Card Number</label>
+              <input
+                type="text"
+                class="bf-input"
+                placeholder="XXXX XXXX XXXX XXXX"
+                maxlength="19"
+                oninput="formatCard(this)"
+                required
+              />
+            </div>
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px"
+            >
+              <div class="bf-form-group">
+                <label class="bf-label">Expiry Date</label>
+                <input
+                  type="text"
+                  class="bf-input"
+                  placeholder="MM/YY"
+                  maxlength="5"
+                  required
+                />
+              </div>
+              <div class="bf-form-group">
+                <label class="bf-label">CVV</label>
+                <input
+                  type="password"
+                  class="bf-input"
+                  placeholder="•••"
+                  maxlength="3"
+                  required
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              class="btn-bf btn-success-bf"
+              style="width: 100%; justify-content: center; padding: 12px"
+              id="confirmPurchaseBtn"
+            >
+              <i class="bi bi-lock-fill"></i> Pay Securely Rs.
+              <span id="payBtnAmt"></span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script
+      type="module"
+      src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"
+    ></script>
+    <script src="js/marketplace.js"></script>
+  </body>
+</html>

@@ -3,72 +3,765 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BuildFlow - Client Dashboard</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <title>My Dashboard — BuildFlow</title>
+    <link rel="stylesheet" href="css/style.css" />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
     />
     <style>
-      .progress-card {
-        border-radius: 15px;
-        transition: 0.3s;
+      /* ── Dashboard overrides ── */
+      .dash-layout {
+        min-height: calc(100vh - 72px);
       }
-      .progress-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+
+      .user-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-light)
+        );
+        color: white;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Playfair Display", serif;
+        font-weight: 700;
+        flex-shrink: 0;
       }
-      .update-img {
-        width: 100%;
+
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+        animation: fadeInUp 0.3s ease both;
+      }
+
+      .no-project-card {
+        background: var(--surface);
+        border: 2px dashed var(--border);
+        border-radius: var(--radius-lg);
+        padding: 60px 32px;
+        text-align: center;
+      }
+
+      /* Circular progress ring */
+      .big-progress-wrap {
+        position: relative;
+        width: 90px;
+        height: 90px;
+        flex-shrink: 0;
+      }
+      .big-progress-wrap svg {
+        transform: rotate(-90deg);
+      }
+      .big-progress-label {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Playfair Display", serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: white;
+      }
+
+      .project-detail-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(
+          135deg,
+          var(--primary-dark),
+          var(--primary)
+        );
+        color: white;
+        border-radius: var(--radius-md);
+        padding: 20px 24px;
+        margin-bottom: 20px;
+      }
+
+      /* ════ PAYMENT TAB STYLES ════ */
+
+      /* Hero banner at top of payments */
+      .pay-hero {
+        background: linear-gradient(
+          135deg,
+          var(--primary-dark) 0%,
+          var(--primary) 55%,
+          var(--primary-light) 100%
+        );
+        border-radius: var(--radius-lg);
+        padding: 28px 32px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 24px;
+      }
+      .pay-hero::before {
+        content: "";
+        position: absolute;
+        top: -70px;
+        right: -70px;
+        width: 280px;
+        height: 280px;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.07) 0%,
+          transparent 70%
+        );
+      }
+      .pay-hero::after {
+        content: "";
+        position: absolute;
+        bottom: -50px;
+        left: -50px;
+        width: 200px;
         height: 200px;
-        object-fit: cover;
-        border-radius: 10px;
+        background: radial-gradient(
+          circle,
+          rgba(201, 136, 58, 0.18) 0%,
+          transparent 70%
+        );
+      }
+      .pay-hero-inner {
+        position: relative;
+        z-index: 1;
+      }
+      .pay-hero-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 24px;
+      }
+      .pay-hero-eyebrow {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.9px;
+        opacity: 0.6;
+        margin-bottom: 6px;
+      }
+      .pay-hero-title {
+        font-family: "Playfair Display", serif;
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .pay-hero-sub {
+        font-size: 0.82rem;
+        opacity: 0.65;
+      }
+
+      .pay-hero-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.18);
+        padding-top: 20px;
+      }
+      .pay-hero-stat {
+        padding: 0 20px;
+      }
+      .pay-hero-stat:first-child {
+        padding-left: 0;
+      }
+      .pay-hero-stat:not(:last-child) {
+        border-right: 1px solid rgba(255, 255, 255, 0.18);
+      }
+      .pay-hs-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        opacity: 0.55;
+        margin-bottom: 4px;
+      }
+      .pay-hs-value {
+        font-family: "Playfair Display", serif;
+        font-size: 1.35rem;
+        font-weight: 700;
+        line-height: 1.1;
+      }
+      .pay-hs-sub {
+        font-size: 0.75rem;
+        opacity: 0.55;
+        margin-top: 3px;
+      }
+
+      /* Payment progress bar inside hero */
+      .pay-hero-bar-wrap {
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 100px;
+        height: 8px;
+        overflow: hidden;
+        margin-top: 16px;
+      }
+      .pay-hero-bar {
+        height: 100%;
+        border-radius: 100px;
+        background: var(--accent-light);
+        transition: width 0.8s ease;
+      }
+
+      /* Donut chart */
+      .donut-wrap {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        flex-shrink: 0;
+      }
+      .donut-wrap svg {
+        transform: rotate(-90deg);
+      }
+      .donut-label {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .donut-pct {
+        font-family: "Playfair Display", serif;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary);
+        line-height: 1;
+      }
+      .donut-sub {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+        font-weight: 600;
+      }
+
+      /* Payment stage cards */
+      .stages-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+      }
+
+      .stage-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 18px 16px;
+        position: relative;
+        transition: all var(--transition);
+      }
+      .stage-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+      }
+      .stage-card.s-paid {
+        border-top: 3px solid var(--success);
+      }
+      .stage-card.s-current {
+        border-top: 3px solid var(--accent);
+        background: var(--warning-light);
+      }
+      .stage-card.s-upcoming {
+        border-top: 3px solid var(--border);
+      }
+
+      .stage-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 12px;
+      }
+      .stage-num-circle {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+      .s-paid .stage-num-circle {
+        background: var(--success-light);
+        color: var(--success);
+      }
+      .s-current .stage-num-circle {
+        background: var(--warning-light);
+        color: var(--accent);
+        border: 2px solid var(--accent);
+      }
+      .s-upcoming .stage-num-circle {
+        background: var(--surface-3);
+        color: var(--text-muted);
+      }
+
+      .stage-name {
+        font-family: "Playfair Display", serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .stage-desc {
+        font-size: 0.77rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+        margin-bottom: 14px;
+      }
+      .stage-amount {
+        font-family: "Playfair Display", serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+      }
+      .s-paid .stage-amount {
+        color: var(--success);
+      }
+      .s-current .stage-amount {
+        color: var(--accent);
+      }
+      .s-upcoming .stage-amount {
+        color: var(--text-muted);
+      }
+      .stage-pct {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+
+      /* Transaction rows */
+      .txn-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--border);
+        transition: background var(--transition);
+      }
+      .txn-row:last-child {
+        border-bottom: none;
+      }
+      .txn-row:hover {
+        background: var(--surface-2);
+      }
+      .txn-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+      }
+      .txn-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .txn-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+      .txn-meta {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+      .txn-amount {
+        font-family: "Playfair Display", serif;
+        font-size: 1rem;
+        font-weight: 700;
+        text-align: right;
+      }
+      .txn-amount.credit {
+        color: var(--success);
+      }
+      .txn-status {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+      }
+
+      /* Invoice / receipt cards */
+      .invoice-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 16px 20px;
+        transition: all var(--transition);
+        cursor: pointer;
+      }
+      .invoice-card:hover {
+        border-color: var(--primary-light);
+        box-shadow: var(--shadow-md);
+        background: var(--surface);
+      }
+      .invoice-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-light)
+        );
+        color: white;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .invoice-info {
+        flex: 1;
+      }
+      .invoice-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        margin-bottom: 3px;
+      }
+      .invoice-meta {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+      }
+
+      /* Breakdown table tweaks */
+      .breakdown-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .breakdown-table td {
+        padding: 12px 16px;
+        font-size: 0.875rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .breakdown-table tr:last-child td {
+        border-bottom: none;
+      }
+      .breakdown-table .row-total td {
+        background: var(--primary);
+        color: white;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+      .breakdown-table .row-paid td {
+        background: var(--success-light);
+      }
+      .breakdown-table .row-due td {
+        background: var(--warning-light);
+      }
+
+      /* Responsive */
+      @media (max-width: 1100px) {
+        .stages-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (max-width: 700px) {
+        .stages-grid {
+          grid-template-columns: 1fr;
+        }
+        .pay-hero-stats {
+          grid-template-columns: 1fr 1fr;
+        }
+        .pay-hero-stat:nth-child(3) {
+          border-right: none;
+          border-top: 1px solid rgba(255, 255, 255, 0.18);
+          padding-top: 16px;
+          margin-top: 4px;
+        }
+        .pay-hero {
+          padding: 18px;
+        }
       }
     </style>
   </head>
-  <body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-      <div class="container">
-        <a class="navbar-brand fw-bold" href="index.html text-uppercase"
-          >BuildFlow <span class="text-primary">Live</span></a
-        >
-        <div class="navbar-nav ms-auto">
-          <span class="nav-link text-white small"
-            >Project ID: <strong id="projIdLabel">#1</strong></span
-          >
+  <body>
+    <!-- ── Navbar ── -->
+    <nav class="bf-nav">
+      <div class="container" style="max-width: 1280px">
+        <a href="index.html" class="bf-logo">
+          <div class="bf-logo-icon"><i class="bi bi-building"></i></div>
+          Build<span>Flow</span>
+        </a>
+        <ul class="bf-nav-links">
+          <li><a href="marketplace.html">Marketplace</a></li>
+          <li>
+            <a href="client-dashboard.html" class="active">My Dashboard</a>
+          </li>
+        </ul>
+        <div class="bf-nav-actions">
+          <div style="display: flex; align-items: center; gap: 10px">
+            <div class="user-avatar" id="userAvatar">U</div>
+            <div>
+              <div
+                style="
+                  font-size: 0.82rem;
+                  font-weight: 600;
+                  color: var(--text-primary);
+                "
+                id="userEmailLabel"
+              >
+                Loading...
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-muted)">
+                Client Account
+              </div>
+            </div>
+          </div>
+          <button class="btn-bf btn-ghost-bf btn-sm-bf" onclick="logout()">
+            <i class="bi bi-box-arrow-right"></i> Logout
+          </button>
         </div>
       </div>
     </nav>
 
-    <div class="container my-5">
-      <div class="row">
-        <div class="col-md-4">
-          <div
-            class="card border-0 shadow-sm p-4 mb-4 progress-card text-center"
+    <!-- ── Layout ── -->
+    <div class="dash-layout">
+      <!-- Sidebar -->
+      <aside class="dash-sidebar">
+        <div class="sidebar-label">Navigation</div>
+        <div class="sidebar-section">
+          <button
+            class="sidebar-item active"
+            id="sb-overview"
+            onclick="switchTab('overview', this)"
           >
-            <h5 class="fw-bold mb-3">Construction Status</h5>
-            <div class="display-4 fw-bold text-primary mb-2">
-              <span id="totalProgress">0</span>%
+            <i class="bi bi-grid-1x2"></i> Overview
+          </button>
+          <button
+            class="sidebar-item"
+            id="sb-project"
+            onclick="switchTab('project', this)"
+          >
+            <i class="bi bi-cone-striped"></i> My Project
+          </button>
+          <button
+            class="sidebar-item"
+            id="sb-payments"
+            onclick="switchTab('payments', this)"
+          >
+            <i class="bi bi-credit-card"></i> Payments
+          </button>
+          <button
+            class="sidebar-item"
+            id="sb-progress"
+            onclick="switchTab('progress', this)"
+          >
+            <i class="bi bi-graph-up"></i> Progress Log
+          </button>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-label">Quick Actions</div>
+        <div class="sidebar-section">
+          <a class="sidebar-item" href="marketplace.html">
+            <i class="bi bi-grid-3x3-gap"></i> Browse Models
+          </a>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section">
+          <button
+            class="sidebar-item"
+            onclick="logout()"
+            style="color: var(--danger)"
+          >
+            <i class="bi bi-box-arrow-right" style="color: var(--danger)"></i>
+            Logout
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="dash-main">
+        <!-- ══════════════════════════════════════
+         OVERVIEW
+    ══════════════════════════════════════ -->
+        <div id="tab-overview" class="tab-content active">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Welcome back 👋</div>
+              <div class="page-subtitle" id="overviewEmail">
+                Loading your dashboard...
+              </div>
             </div>
-            <p class="text-muted small">
-              Total work completed based on the latest update.
-            </p>
+            <a href="marketplace.html" class="btn-bf btn-primary-bf btn-sm-bf">
+              <i class="bi bi-plus"></i> Browse More Models
+            </a>
+          </div>
+
+          <div class="grid-4 section-gap">
+            <div class="stat-card">
+              <div class="stat-icon blue">
+                <i class="bi bi-cone-striped"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-label">Active Projects</div>
+                <div class="stat-value" id="statProjects">—</div>
+                <div class="stat-sub">Construction projects</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green">
+                <i class="bi bi-bar-chart-line"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-label">Progress</div>
+                <div class="stat-value" id="statProgress">—</div>
+                <div class="stat-sub">Overall completion</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon amber">
+                <i class="bi bi-currency-rupee"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-label">Total Paid</div>
+                <div class="stat-value" id="statPaid">—</div>
+                <div class="stat-sub">Advance payments made</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon red">
+                <i class="bi bi-hourglass-split"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-label">Balance Due</div>
+                <div class="stat-value" id="statDue">—</div>
+                <div class="stat-sub">Remaining amount</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bf-card section-gap">
+            <div class="bf-card-header">
+              <div class="bf-card-title">
+                <i class="bi bi-activity" style="color: var(--primary)"></i>
+                Project Summary
+              </div>
+              <button
+                class="btn-bf btn-ghost-bf btn-sm-bf"
+                onclick="
+                  switchTab('project', document.getElementById('sb-project'))
+                "
+              >
+                View Details
+              </button>
+            </div>
+            <div class="bf-card-body" id="overviewProjectSummary">
+              <div class="empty-state">
+                <span class="spinner-bf dark"></span>
+                <p style="margin-top: 10px">Loading...</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bf-card">
+            <div class="bf-card-header">
+              <div class="bf-card-title">
+                <i
+                  class="bi bi-clock-history"
+                  style="color: var(--primary)"
+                ></i>
+                Latest Updates
+              </div>
+              <button
+                class="btn-bf btn-ghost-bf btn-sm-bf"
+                onclick="
+                  switchTab('progress', document.getElementById('sb-progress'))
+                "
+              >
+                All Updates
+              </button>
+            </div>
+            <div class="bf-card-body" id="latestUpdatesBody">
+              <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <p>No updates yet.</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="col-md-8">
-          <h4 class="fw-bold mb-4">Real-time Progress Updates</h4>
-          <div id="progressTimeline">
-            <div class="text-center py-5">
-              <div class="spinner-border text-primary" role="status"></div>
-              <p class="mt-2">Fetching updates from site...</p>
+        <!-- ══════════════════════════════════════
+         MY PROJECT
+    ══════════════════════════════════════ -->
+        <div id="tab-project" class="tab-content">
+          <div class="page-header">
+            <div>
+              <div class="page-title">My Project</div>
+              <div class="page-subtitle">
+                Construction details and current status
+              </div>
+            </div>
+          </div>
+          <div id="projectTabContent">
+            <div class="empty-state">
+              <span class="spinner-bf dark"></span>
+              <p style="margin-top: 10px">Loading project...</p>
             </div>
           </div>
         </div>
-      </div>
+
+        <!-- ══════════════════════════════════════
+         PAYMENTS  ← the new rich tab
+    ══════════════════════════════════════ -->
+        <div id="tab-payments" class="tab-content">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Payments</div>
+              <div class="page-subtitle">
+                Full breakdown, payment schedule &amp; transaction history
+              </div>
+            </div>
+            <button
+              class="btn-bf btn-ghost-bf btn-sm-bf"
+              id="downloadReceiptBtn"
+              style="display: none"
+              onclick="handleDownloadReceipt()"
+            >
+              <i class="bi bi-download"></i> Download Receipt
+            </button>
+          </div>
+          <!-- Rendered by JS -->
+          <div id="paymentsTabContent">
+            <div class="empty-state">
+              <span class="spinner-bf dark"></span>
+              <p style="margin-top: 10px">Loading payments...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+         PROGRESS LOG
+    ══════════════════════════════════════ -->
+        <div id="tab-progress" class="tab-content">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Progress Log</div>
+              <div class="page-subtitle">
+                Detailed construction updates with site photos
+              </div>
+            </div>
+          </div>
+          <div id="progressTabContent">
+            <div class="empty-state">
+              <span class="spinner-bf dark"></span>
+              <p style="margin-top: 10px">Loading progress...</p>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
 
     <script src="js/dashboard.js"></script>

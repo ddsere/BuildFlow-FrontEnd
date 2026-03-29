@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In — BuildFlow</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <style>
+      body {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f0f4fa 0%, #e8edf6 100%);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .auth-wrapper {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+      }
+
+      .auth-box {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        background: var(--surface);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        width: 100%;
+        max-width: 880px;
+      }
+
+      .auth-visual {
+        background: linear-gradient(
+          135deg,
+          var(--primary-dark) 0%,
+          var(--primary) 60%,
+          var(--primary-light) 100%
+        );
+        padding: 48px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .auth-visual::before {
+        content: "";
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.08) 0%,
+          transparent 70%
+        );
+      }
+
+      .auth-visual::after {
+        content: "";
+        position: absolute;
+        bottom: -40px;
+        left: -40px;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(
+          circle,
+          rgba(201, 136, 58, 0.2) 0%,
+          transparent 70%
+        );
+      }
+
+      .auth-visual-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .auth-visual-logo {
+        font-family: "Playfair Display", serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 48px;
+      }
+
+      .auth-visual-logo span {
+        color: var(--accent-light);
+      }
+
+      .auth-visual h2 {
+        font-family: "Playfair Display", serif;
+        font-size: 1.8rem;
+        color: white;
+        font-weight: 700;
+        margin-bottom: 14px;
+      }
+
+      .auth-visual p {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        line-height: 1.7;
+      }
+
+      .auth-features {
+        margin-top: 40px;
+      }
+
+      .auth-feature-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .auth-feature-item .dot {
+        width: 28px;
+        height: 28px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+      }
+
+      .auth-feature-item span {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.875rem;
+      }
+
+      .auth-form-wrap {
+        padding: 48px 40px;
+      }
+
+      .auth-form-title {
+        font-family: "Playfair Display", serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+
+      .auth-form-sub {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        margin-bottom: 32px;
+      }
+
+      .auth-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 20px 0;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+      }
+
+      .auth-divider::before,
+      .auth-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+
+      .auth-footer {
+        text-align: center;
+        margin-top: 24px;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+      }
+      .auth-footer a {
+        color: var(--primary-light);
+        font-weight: 600;
+      }
+
+      @media (max-width: 768px) {
+        .auth-box {
+          grid-template-columns: 1fr;
+        }
+        .auth-visual {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="bf-nav">
+      <div class="container">
+        <a href="index.html" class="bf-logo">
+          <div class="bf-logo-icon"><i class="bi bi-building"></i></div>
+          Build<span>Flow</span>
+        </a>
+        <div class="bf-nav-actions">
+          <span style="font-size: 0.875rem; color: var(--text-muted)"
+            >Don't have an account?</span
+          >
+          <a href="register.html" class="btn-bf btn-outline-bf">Register</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="auth-wrapper">
+      <div class="auth-box anim-fade-up">
+        <!-- Visual -->
+        <div class="auth-visual">
+          <div class="auth-visual-content">
+            <div class="auth-visual-logo">Build<span>Flow</span></div>
+            <h2>Welcome Back</h2>
+            <p>
+              Sign in to track your construction progress, manage payments, and
+              explore new architectural models.
+            </p>
+            <div class="auth-features">
+              <div class="auth-feature-item">
+                <div class="dot"><i class="bi bi-graph-up"></i></div>
+                <span>Real-time project tracking</span>
+              </div>
+              <div class="auth-feature-item">
+                <div class="dot"><i class="bi bi-currency-rupee"></i></div>
+                <span>Transparent payment management</span>
+              </div>
+              <div class="auth-feature-item">
+                <div class="dot"><i class="bi bi-box"></i></div>
+                <span>Interactive 3D house models</span>
+              </div>
+            </div>
+          </div>
+          <p
+            style="
+              color: rgba(255, 255, 255, 0.4);
+              font-size: 0.75rem;
+              position: relative;
+              z-index: 1;
+            "
+          >
+            © 2026 BuildFlow Architecture
+          </p>
+        </div>
+
+        <!-- Form -->
+        <div class="auth-form-wrap">
+          <h1 class="auth-form-title">Sign In</h1>
+          <p class="auth-form-sub">
+            Enter your credentials to access your account
+          </p>
+
+          <div id="loginAlert"></div>
+
+          <form id="loginForm">
+            <div class="bf-form-group">
+              <label class="bf-label" for="loginEmail">Email Address</label>
+              <input
+                type="email"
+                id="loginEmail"
+                class="bf-input"
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+            <div class="bf-form-group">
+              <label class="bf-label" for="loginPassword">
+                Password
+                <a
+                  href="#"
+                  style="
+                    float: right;
+                    font-weight: 400;
+                    color: var(--primary-light);
+                    font-size: 0.8rem;
+                  "
+                  >Forgot password?</a
+                >
+              </label>
+              <div style="position: relative">
+                <input
+                  type="password"
+                  id="loginPassword"
+                  class="bf-input"
+                  placeholder="••••••••"
+                  required
+                  style="padding-right: 44px"
+                />
+                <button
+                  type="button"
+                  id="togglePass"
+                  style="
+                    position: absolute;
+                    right: 12px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: none;
+                    border: none;
+                    color: var(--text-muted);
+                    cursor: pointer;
+                    font-size: 1rem;
+                  "
+                >
+                  <i class="bi bi-eye" id="eyeIcon"></i>
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="btn-bf btn-primary-bf"
+              style="width: 100%; justify-content: center; padding: 12px"
+              id="loginBtn"
+            >
+              <i class="bi bi-box-arrow-in-right"></i> Sign In
+            </button>
+          </form>
+
+          <div class="auth-footer">
+            Don't have an account? <a href="register.html">Create one free</a>
+          </div>
+
+          <div class="auth-divider">or</div>
+
+          <a
+            href="admin.html"
+            class="btn-bf btn-ghost-bf"
+            style="width: 100%; justify-content: center"
+          >
+            <i class="bi bi-shield-lock"></i> Admin Access
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Toggle password visibility
+      document
+        .getElementById("togglePass")
+        .addEventListener("click", function () {
+          const input = document.getElementById("loginPassword");
+          const icon = document.getElementById("eyeIcon");
+          if (input.type === "password") {
+            input.type = "text";
+            icon.className = "bi bi-eye-slash";
+          } else {
+            input.type = "password";
+            icon.className = "bi bi-eye";
+          }
+        });
+
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const btn = document.getElementById("loginBtn");
+          const alertBox = document.getElementById("loginAlert");
+          const email = document.getElementById("loginEmail").value;
+          const password = document.getElementById("loginPassword").value;
+
+          btn.disabled = true;
+          btn.innerHTML = '<span class="spinner-bf"></span> Signing in...';
+          alertBox.innerHTML = "";
+
+          try {
+            const res = await fetch("http://localhost:8080/api/v1/auth/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password }),
+            });
+            const result = await res.json();
+            const token = result.data?.token || result.token;
+
+            if (token) {
+              localStorage.setItem("authToken", token);
+              localStorage.setItem("userEmail", result.data?.email || email);
+              alertBox.innerHTML =
+                '<div class="bf-alert bf-alert-success"><i class="bi bi-check-circle-fill"></i> Login successful! Redirecting...</div>';
+              setTimeout(() => {
+                window.location.href = "client-dashboard.html";
+              }, 1000);
+            } else {
+              throw new Error("Invalid email or password");
+            }
+          } catch (err) {
+            alertBox.innerHTML = `<div class="bf-alert bf-alert-danger"><i class="bi bi-exclamation-triangle-fill"></i> ${err.message || "System error. Please try again."}</div>`;
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> Sign In';
+          }
+        });
+    </script>
+  </body>
+</html>
